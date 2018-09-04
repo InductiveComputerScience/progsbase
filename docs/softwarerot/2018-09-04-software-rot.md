@@ -1,4 +1,4 @@
-# Software Rot and Classes of Rot Resistances
+# Software Rot and Classes of Rot Resistance
 
 Something we have all experienced is that our favorite program stops working. Be it an old game at home or our enterprise system at work. This is an example of software rot. *Software rot* is when an unchanged program stops working. Another thing often called software rot is poor maintenance of software. That is rather a question of engineering practices and will not be covered in this article. Here we will talk about unchanged software.
 
