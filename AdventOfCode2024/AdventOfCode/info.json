@@ -1,0 +1,20 @@
+{
+  "name": "AdventOfCode2024",
+  "version": "0.1.0-SNAPSHOT",
+  "organization namespace": "no.inductive.libraries",
+  "scientific namespace": "computerscience.datastructures.basic",
+  "imports": [
+    ["", "no.inductive.idea10.programs", "references", "0.1.5"],
+    ["a", "no.inductive.idea10.programs", "arrays", "0.9.7"],
+    ["", "no.inductive.idea10.programs", "numbers", "0.1.32"],
+    ["s", "no.inductive.idea10.programs", "strings", "0.9.16"],
+    ["", "no.inductive.idea10.programs", "lists", "0.1.14"],
+    ["", "no.inductive.libraries", "DataStructures", "0.1.5"],
+    ["", "no.inductive.libraries", "QuickSort", "0.1.8"]
+  ],
+  "development imports": [
+    ["", "no.inductive.idea10.programs", "testing", "0.1.8"]
+  ],
+  "reprefix": [],
+  "ownerCustomerId": "Inductive AS"
+}
