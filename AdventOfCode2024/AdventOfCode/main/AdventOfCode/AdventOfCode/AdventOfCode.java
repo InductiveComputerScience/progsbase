@@ -1,14 +1,23 @@
 package AdventOfCode.AdventOfCode;
 
+import lists.LinkedListCharacters.Structures.LinkedListCharacters;
+import lists.LinkedListStrings.Structures.LinkedListStrings;
 import references.references.NumberArrayReference;
+import references.references.NumberReference;
 import references.references.StringReference;
 
+import static DataStructures.Array.Structures.Structures.IsNumber;
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
+import static charCharacters.Characters.Characters.charIsNumber;
 import static java.lang.Math.abs;
+import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
+import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
 import static numbers.StringToNumber.StringToNumber.CreateNumberFromDecimalString;
-import static references.references.references.CreateNumberArrayReferenceLengthValue;
+import static numbers.StringToNumber.StringToNumber.CreateNumberFromDecimalStringWithCheck;
+import static references.references.references.*;
 import static strings.strings.strings.SplitByCharacter;
+import static strings.strings.strings.SplitByString;
 
 public class AdventOfCode {
     public static char [] ComputeDay1Part1(char [] input){ // 45
@@ -315,4 +324,207 @@ public class AdventOfCode {
 
         return output;
     }
+
+    public static char[] ComputeDay3Part1(char[] input) {
+        char [] output;
+        double n, i, n1, n2;
+        StringReference[] muls, params, numbers;
+        boolean success;
+        StringReference message;
+        NumberReference nRef = new NumberReference();
+
+        message = new StringReference();
+
+        n = 0;
+
+        muls = SplitByString(input, "mul(".toCharArray());
+
+        for(i = 1d; i < muls.length; i = i + 1d) {
+            params = SplitByCharacter(muls[(int)i].string, ')');
+            if(params.length >= 2){
+                numbers = SplitByCharacter(params[0].string, ',');
+                if(numbers.length == 2){
+                    success = CreateNumberFromDecimalStringWithCheck(numbers[0].string, nRef, message);
+                    if(success) {
+                        n1 = nRef.numberValue;
+                        if(n1 >= 0 && n1 <= 999) {
+                            success = CreateNumberFromDecimalStringWithCheck(numbers[1].string, nRef, message);
+                            if (success) {
+                                n2 = nRef.numberValue;
+                                if(n2 >= 0 && n2 <= 999) {
+                                    n = n + n1 * n2;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static char[] ComputeDay3Part2(char[] input) {
+        char [] output;
+        double n, i, n1, n2;
+        StringReference[] muls, params, numbers, dos, donts;
+        boolean success;
+        StringReference message;
+        NumberReference nRef = new NumberReference();
+        LinkedListCharacters ll;
+
+        ll = CreateLinkedListCharacter();
+
+        message = new StringReference();
+
+        n = 0;
+
+        dos = SplitByString(input, "do()".toCharArray());
+        for(i = 0d; i < dos.length; i++){
+            donts = SplitByString(dos[(int)i].string, "don't()".toCharArray());
+            LinkedListCharactersAddString(ll, donts[0].string);
+        }
+
+        input = LinkedListCharactersToArray(ll);
+
+        muls = SplitByString(input, "mul(".toCharArray());
+
+        for(i = 1d; i < muls.length; i = i + 1d) {
+            params = SplitByCharacter(muls[(int)i].string, ')');
+            if(params.length >= 2){
+                numbers = SplitByCharacter(params[0].string, ',');
+                if(numbers.length == 2){
+                    success = CreateNumberFromDecimalStringWithCheck(numbers[0].string, nRef, message);
+                    if(success) {
+                        n1 = nRef.numberValue;
+                        if(n1 >= 0 && n1 <= 999) {
+                            success = CreateNumberFromDecimalStringWithCheck(numbers[1].string, nRef, message);
+                            if (success) {
+                                n2 = nRef.numberValue;
+                                if(n2 >= 0 && n2 <= 999) {
+                                    n = n + n1 * n2;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static char[] ComputeDay4Part1(char[] input) {
+        char [] output;
+        double n, w, h, i;
+
+        StringReference[] field = SplitByCharacter(input, '\n');
+
+        w = field.length;
+        h = field[0].string.length;
+
+        n = 0d;
+
+        for(i = 0; i < 4d; i = i + 1d){
+            n = n + CountRight(w, h, field);
+            n = n + CountSlope(w, h, field);
+            field = Rotate90(field);
+        }
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    // Day 4, Part 1 - Functions
+    public static char GetCharacter(StringReference[] field, double x, double y) {
+        return field[(int)y].string[(int)x];
+    }
+
+    public static double CountRight(double w, double h, StringReference[] field) {
+        double x, y, n;
+
+        n = 0d;
+
+        for(y = 0; y < h; y = y + 1d){
+            for(x = 0; x < w - 3d; x = x + 1d){
+                if(
+                    GetCharacter(field, x+0d, y) == 'X' &&
+                    GetCharacter(field, x+1d, y) == 'M' &&
+                    GetCharacter(field, x+2d, y) == 'A' &&
+                    GetCharacter(field, x+3d, y) == 'S'
+                ){
+                    n = n + 1d;
+                }
+            }
+        }
+
+        return n;
+    }
+
+    public static double CountSlope(double w, double h, StringReference[] field) {
+        double x, y, n;
+
+        n = 0;
+
+        for(y = 0; y < h - 3d; y = y + 1d){
+            for(x = 0; x < w - 3d; x = x + 1d){
+                if(
+                    GetCharacter(field, x+0d, y+0d) == 'X' &&
+                    GetCharacter(field, x+1d, y+1d) == 'M' &&
+                    GetCharacter(field, x+2d, y+2d) == 'A' &&
+                    GetCharacter(field, x+3d, y+3d) == 'S'
+                ){
+                    n = n + 1d;
+                }
+            }
+        }
+
+        return n;
+    }
+
+    public static StringReference[] Rotate90(StringReference[] field) {
+        double w, h, x, y;
+        StringReference [] rotated;
+
+        w = field[0].string.length;
+        h = field.length;
+
+        rotated = new StringReference[(int)h];
+
+        for(y = 0; y < h; y = y + 1d){
+            rotated[(int)y] = CreateStringReferenceLengthValue(w, '_');
+            for(x = 0; x < w; x = x + 1d){
+                rotated[(int)y].string[(int)x] = GetCharacter(field, w-y-1d, x);
+            }
+        }
+
+        return rotated;
+    }
+
+    public static void PrintField(double w, double h, StringReference[] paddedLines) {
+        double y, x;
+
+        for(y = 0; y < h; y++){
+            for(x = 0; x < w; x++){
+                System.out.print(GetCharacter(paddedLines, x, y));
+            }
+            System.out.println();
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
