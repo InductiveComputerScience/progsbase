@@ -7,6 +7,7 @@ import references.references.NumberReference;
 import references.references.StringReference;
 
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
+import static aarrays.arrays.arrays.aCopyString;
 import static java.lang.Math.abs;
 import static java.lang.Math.floor;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
@@ -772,16 +773,16 @@ public class AdventOfCode {
         char [] output;
         double n, i, j;
 
-        StringReference[] lines = SplitByCharacter(input, '\n');
+        StringReference[] field = SplitByCharacter(input, '\n');
 
         // Run
-        Iterate(lines);
+        Iterate(field);
 
         // Count
         n = 0;
-        for(i = 0d; i < lines.length; i = i + 1d){
-            for(j = 0d; j < lines[(int)i].string.length; j = j + 1d){
-                if(GetCharacter(lines, i, j) == 'X'){
+        for(i = 0d; i < field.length; i = i + 1d){
+            for(j = 0d; j < field[(int)i].string.length; j = j + 1d){
+                if(GetCharacter(field, i, j) == 'X'){
                     n = n + 1d;
                 }
             }
@@ -792,8 +793,8 @@ public class AdventOfCode {
         return output;
     }
 
-    public static void Iterate(StringReference[] field) {
-        double i, j, x, y, w, h;
+    public static boolean Iterate(StringReference[] field) {
+        double i, j, x, y, w, h, max;
         char d, c;
         boolean exit;
 
@@ -814,8 +815,13 @@ public class AdventOfCode {
         }
 
         exit = false;
-        for(;!exit;) {
+        max = w * h * 4d;
+        for(i = 0; !exit && i < max; i = i + 1d) {
             d = GetCharacter(field, x, y);
+
+            if(d == '.' || d == 'X' || d == '#'){
+                //System.out.println("error");
+            }
 
             if (d == '^') {
                 exit = y == 0;
@@ -857,7 +863,7 @@ public class AdventOfCode {
                         SetCharacter(field, x, y + 1d, d);
                         y = y + 1d;
                     }
-                } else {
+                } else if (d == '<') {
                     if (GetCharacter(field, x - 1d, y) == '#') {
                         SetCharacter(field, x, y, '^');
                     } else {
@@ -868,10 +874,63 @@ public class AdventOfCode {
                 }
             }
         }
+
+        return i == max;
     }
 
     public static void SetCharacter(StringReference[] field, double x, double y, char c) {
         field[(int)y].string[(int)x] = c;
+    }
+
+    public static char[] ComputeDay6Part2(char[] input) {
+        char [] output;
+        double n, x, y, w, h;
+        StringReference[] field;
+        char c;
+        boolean loop;
+
+        field = SplitByCharacter(input, '\n');
+
+        h = field.length;
+        w = field[0].string.length;
+
+        // Count
+        n = 0;
+        for(y = 0d; y < h; y = y + 1d){
+            for(x = 0d; x < w; x = x + 1d){
+                field = SplitByCharacter(input, '\n');
+
+                c = GetCharacter(field, x, y);
+                if(c == '^' || c == '>' || c == 'v' || c == '<' || c == '#'){
+
+                }else{
+                    SetCharacter(field, x, y, '#');
+                    //PrintField(w, h, field);
+                    //System.out.println();
+                    loop = Iterate(field);
+                    if(loop){
+                        n = n + 1d;
+                    }
+                }
+            }
+        }
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static StringReference[] CopyField(StringReference[] a) {
+        StringReference [] b;
+        double i;
+
+        b = new StringReference[a.length];
+        for(i = 0d; i < a.length; i = i + 1d){
+            b[(int)i] = new StringReference();
+            b[(int)i].string = aCopyString(a[(int)i].string);
+        }
+
+        return b;
     }
 }
 
