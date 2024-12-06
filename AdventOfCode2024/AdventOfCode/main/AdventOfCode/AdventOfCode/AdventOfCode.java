@@ -775,8 +775,7 @@ public class AdventOfCode {
         StringReference[] lines = SplitByCharacter(input, '\n');
 
         // Run
-        for(;!Iterate(lines);){
-        }
+        Iterate(lines);
 
         // Count
         n = 0;
@@ -793,81 +792,82 @@ public class AdventOfCode {
         return output;
     }
 
-    public static boolean Iterate(StringReference[] field) {
+    public static void Iterate(StringReference[] field) {
         double i, j, x, y, w, h;
         char d, c;
-        boolean found, willExit;
+        boolean exit;
 
         x = 0;
         y = 0;
-        d = ' ';
         h = field.length;
         w = field[0].string.length;
 
         // Find
-        found = false;
-        for(i = 0d; i < h && !found; i = i + 1d){
-            for(j = 0d; j < w && !found; j = j + 1d){
+        for (i = 0d; i < h; i = i + 1d) {
+            for (j = 0d; j < w; j = j + 1d) {
                 c = GetCharacter(field, j, i);
-                if(c == '^' || c == '<' || c == '>' || c == 'v'){
+                if (c == '^' || c == '<' || c == '>' || c == 'v') {
                     x = j;
                     y = i;
-                    found = true;
-                    d = c;
                 }
             }
         }
 
-        // Will exit
-        willExit = false;
-        if(d == '^'){
-            willExit = y == 0;
-        }else if(d == '>'){
-            willExit = x == w - 1d;
-        }else if(d == 'v'){
-            willExit = y == h - 1d;
-        }else if(d == '<'){
-            willExit = x == 0d;
-        }
+        exit = false;
+        for(;!exit;) {
+            d = GetCharacter(field, x, y);
 
-        if(willExit){
-            SetCharacter(field, x, y, 'X');
-        }else{
-            //PrintField(w, h, field);
-            //System.out.println();
+            if (d == '^') {
+                exit = y == 0;
+            } else if (d == '>') {
+                exit = x == w - 1d;
+            } else if (d == 'v') {
+                exit = y == h - 1d;
+            } else if (d == '<') {
+                exit = x == 0d;
+            }
 
-            if(d == '^'){
-                if(GetCharacter(field, x, y-1d) == '#'){
-                    SetCharacter(field, x, y, '>');
-                }else{
-                    SetCharacter(field, x, y, 'X');
-                    SetCharacter(field, x, y-1d, d);
-                }
-            }else if(d == '>'){
-                if(GetCharacter(field, x+1d, y) == '#'){
-                    SetCharacter(field, x, y, 'v');
-                }else{
-                    SetCharacter(field, x, y, 'X');
-                    SetCharacter(field, x+1d, y, d);
-                }
-            }else if(d == 'v'){
-                if(GetCharacter(field, x, y+1d) == '#'){
-                    SetCharacter(field, x, y, '<');
-                }else{
-                    SetCharacter(field, x, y, 'X');
-                    SetCharacter(field, x, y+1d, d);
-                }
-            }else{
-                if(GetCharacter(field, x-1d, y) == '#'){
-                    SetCharacter(field, x, y, '^');
-                }else{
-                    SetCharacter(field, x, y, 'X');
-                    SetCharacter(field, x-1d, y, d);
+            if (exit) {
+                SetCharacter(field, x, y, 'X');
+            } else {
+                //PrintField(w, h, field);
+                //System.out.println();
+
+                if (d == '^') {
+                    if (GetCharacter(field, x, y - 1d) == '#') {
+                        SetCharacter(field, x, y, '>');
+                    } else {
+                        SetCharacter(field, x, y, 'X');
+                        SetCharacter(field, x, y - 1d, d);
+                        y = y - 1d;
+                    }
+                } else if (d == '>') {
+                    if (GetCharacter(field, x + 1d, y) == '#') {
+                        SetCharacter(field, x, y, 'v');
+                    } else {
+                        SetCharacter(field, x, y, 'X');
+                        SetCharacter(field, x + 1d, y, d);
+                        x = x + 1d;
+                    }
+                } else if (d == 'v') {
+                    if (GetCharacter(field, x, y + 1d) == '#') {
+                        SetCharacter(field, x, y, '<');
+                    } else {
+                        SetCharacter(field, x, y, 'X');
+                        SetCharacter(field, x, y + 1d, d);
+                        y = y + 1d;
+                    }
+                } else {
+                    if (GetCharacter(field, x - 1d, y) == '#') {
+                        SetCharacter(field, x, y, '^');
+                    } else {
+                        SetCharacter(field, x, y, 'X');
+                        SetCharacter(field, x - 1d, y, d);
+                        x = x - 1d;
+                    }
                 }
             }
         }
-
-        return willExit;
     }
 
     public static void SetCharacter(StringReference[] field, double x, double y, char c) {
