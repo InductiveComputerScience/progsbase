@@ -6,25 +6,22 @@ import references.references.NumberArrayReference;
 import references.references.NumberReference;
 import references.references.StringReference;
 
-import static DataStructures.Array.Structures.Structures.IsNumber;
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
-import static charCharacters.Characters.Characters.charIsNumber;
 import static java.lang.Math.abs;
+import static java.lang.Math.floor;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
 import static numbers.StringToNumber.StringToNumber.CreateNumberFromDecimalString;
 import static numbers.StringToNumber.StringToNumber.CreateNumberFromDecimalStringWithCheck;
 import static references.references.references.*;
-import static strings.strings.strings.SplitByCharacter;
-import static strings.strings.strings.SplitByString;
+import static strings.strings.strings.*;
 
 public class AdventOfCode {
-    public static char [] ComputeDay1Part1(char [] input){ // 45
-        char [] output, line, part;
-        double i, j, sum, n;
+    public static char [] ComputeDay1Part1(char [] input){
+        char [] output, line;
+        double i, sum, n;
         double [] left, right;
-        boolean leftset, rightset;
         StringReference[] lines, parts;
 
         lines = SplitByCharacter(input, '\n');
@@ -35,24 +32,10 @@ public class AdventOfCode {
 
         for(i = 0d; i < lines.length; i = i + 1d){
             line = lines[(int) i].string;
-            parts = SplitByCharacter(line, ' ');
+            parts = SplitByString(line, "   ".toCharArray());
 
-            leftset = false;
-            rightset = false;
-
-            for(j = 0d; j < parts.length; j = j + 1d){
-                part = parts[(int) j].string;
-
-                if(part.length > 0) {
-                    if(!leftset) {
-                        left[(int) i] = CreateNumberFromDecimalString(part);
-                        leftset = true;
-                    }else if(!rightset){
-                        right[(int) i] = CreateNumberFromDecimalString(part);
-                        rightset = true;
-                    }
-                }
-            }
+            left[(int)i] = CreateNumberFromDecimalString(parts[0].string);
+            right[(int)i] = CreateNumberFromDecimalString(parts[1].string);
         }
 
         QuickSortNumbers(left);
@@ -68,12 +51,11 @@ public class AdventOfCode {
         return output;
     }
 
-    public static char [] ComputeDay1Part2(char [] input){ // 57
+    public static char [] ComputeDay1Part2(char [] input){
         char [] output;
         double i, j, sum, n, m, c;
         double [] left, right;
-        boolean leftset, rightset;
-        char [] line, part;
+        char [] line;
         StringReference [] lines, parts;
 
         lines = SplitByCharacter(input, '\n');
@@ -84,24 +66,10 @@ public class AdventOfCode {
 
         for(i = 0d; i < lines.length; i = i + 1d){
             line = lines[(int) i].string;
-            parts = SplitByCharacter(line, ' ');
+            parts = SplitByString(line, "   ".toCharArray());
 
-            leftset = false;
-            rightset = false;
-
-            for(j = 0d; j < parts.length; j = j + 1d){
-                part = parts[(int) j].string;
-
-                if(part.length > 0) {
-                    if(!leftset) {
-                        left[(int) i] = CreateNumberFromDecimalString(part);
-                        leftset = true;
-                    }else if(!rightset){
-                        right[(int) i] = CreateNumberFromDecimalString(part);
-                        rightset = true;
-                    }
-                }
-            }
+            left[(int)i] = CreateNumberFromDecimalString(parts[0].string);
+            right[(int)i] = CreateNumberFromDecimalString(parts[1].string);
         }
 
         QuickSortNumbers(left);
@@ -518,7 +486,395 @@ public class AdventOfCode {
             System.out.println();
         }
     }
+
+    public static char[] ComputeDay4Part2(char[] input) {
+        char [] output;
+        double n, w, h, i;
+
+        StringReference[] field = SplitByCharacter(input, '\n');
+
+        w = field.length;
+        h = field[0].string.length;
+
+        n = 0d;
+
+        for(i = 0; i < 4d; i = i + 1d){
+            n = n + CountCrossMAS(w, h, field);
+            field = Rotate90(field);
+        }
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static double CountCrossMAS(double w, double h, StringReference[] field) {
+        double x, y, n;
+
+        n = 0;
+
+        for(y = 0; y < h - 2d; y = y + 1d){
+            for(x = 0; x < w - 2d; x = x + 1d){
+                if(
+                    GetCharacter(field, x+0d, y+0d) == 'M' &&
+                    GetCharacter(field, x+1d, y+1d) == 'A' &&
+                    GetCharacter(field, x+2d, y+2d) == 'S' &&
+
+                    GetCharacter(field, x+2d, y+0d) == 'M' &&
+                    GetCharacter(field, x+1d, y+1d) == 'A' &&
+                    GetCharacter(field, x+0d, y+2d) == 'S'
+                ){
+                    n = n + 1d;
+                }
+            }
+        }
+
+        return n;
+    }
+
+    public static char[] ComputeDay5Part1(char[] input) {
+        char [] output;
+        double n, i, j, o, p;
+        LinkedListStrings ordersLL, listsLL;
+        char[] line;
+        boolean doingOrders;
+        Order [] orders;
+        double [] list;
+
+        ordersLL = CreateLinkedListString();
+        listsLL = CreateLinkedListString();
+
+        StringReference[] lines = SplitByCharacter(input, '\n');
+
+        doingOrders = true;
+        for(i = 0d; i < lines.length; i = i + 1d){
+            line = lines[(int) i].string;
+
+            if(doingOrders) {
+                if (ContainsCharacter(line, '|')) {
+                    LinkedListAddString(ordersLL, line);
+                }
+                if (Trim(line).length == 0d) {
+                    doingOrders = false;
+                }
+            }else{
+                LinkedListAddString(listsLL, line);
+            }
+        }
+
+        n = 0;
+
+        StringReference[] orderLines = LinkedListStringsToArray(ordersLL);
+        StringReference[] listLines = LinkedListStringsToArray(listsLL);
+
+        /*System.out.println("Orders:");
+        for(i = 0d; i < orderLines.length; i = i + 1d){
+            System.out.println(new String(orderLines[(int)i].string));
+        }
+
+        System.out.println("Lists:");
+        for(i = 0d; i < listLines.length; i = i + 1d){
+            System.out.println(new String(listLines[(int)i].string));
+        }*/
+
+        orders = new Order[orderLines.length];
+        for(i = 0d; i < orderLines.length; i = i + 1d){
+            orders[(int)i] = new Order();
+            StringReference[] parts = SplitByCharacter(orderLines[(int)i].string, '|');
+            orders[(int)i].a = CreateNumberFromDecimalString(parts[0].string);
+            orders[(int)i].b = CreateNumberFromDecimalString(parts[1].string);
+        }
+
+        /*for(i = 0d; i < orders.length; i = i + 1d){
+            System.out.println(orders[(int)i].a + " | " + orders[(int)i].b);
+        }*/
+
+        //System.out.println("Lists:");
+        for(i = 0d; i < listLines.length; i = i + 1d){
+            StringReference[] parts = SplitByCharacter(listLines[(int)i].string, ',');
+            list = new double[parts.length];
+            for(j = 0d; j < list.length; j = j + 1d){
+                list[(int)j] = CreateNumberFromDecimalString(parts[(int)j].string);
+                //System.out.print(list[(int)j] + ":");
+            }
+            //System.out.println();
+
+            // Check if valid:
+            boolean valid = IsValid(orders, list);
+
+            //System.out.println("Line " + i + " " + valid);
+
+            if(valid){
+                n = n + list[(int)(floor(list.length / 2d))];
+                //System.out.println(list[(int)(floor(list.length / 2d))]);
+            }
+        }
+
+        //System.out.println(n);
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static boolean IsValid(Order[] orders, double[] list) {
+        double o, p;
+        boolean valid = true;
+        double n1 = 0, n2 = 0;
+        boolean n1found, n2found;
+
+        for(o = 0d; o < orders.length; o = o + 1d){
+            n1found = false;
+            n2found = false;
+            for(p = 0d; p < list.length; p = p + 1d){
+                if(list[(int)p] == orders[(int)o].a){
+                    n1 = p;
+                    n1found = true;
+                }
+                if(list[(int)p] == orders[(int)o].b){
+                    n2 = p;
+                    n2found = true;
+                }
+            }
+
+            if(n1found && n2found) {
+                if (n1 > n2) {
+                    valid = false;
+                }
+            }
+        }
+        return valid;
+    }
+
+    public static void Fix(Order[] orders, double[] list) {
+        double o, p, t;
+        double n1 = 0, n2 = 0;
+        boolean n1found, n2found;
+
+        for(int i = 0;!IsValid(orders, list);i++) {
+            for (o = 0d; o < orders.length; o = o + 1d) {
+                n1found = false;
+                n2found = false;
+                for (p = 0d; p < list.length; p = p + 1d) {
+                    if (list[(int) p] == orders[(int) o].a) {
+                        n1 = p;
+                        n1found = true;
+                    }
+                    if (list[(int) p] == orders[(int) o].b) {
+                        n2 = p;
+                        n2found = true;
+                    }
+                }
+
+                if (n1found && n2found) {
+                    if (n1 > n2) {
+                        t = list[(int) n1];
+                        list[(int) n1] = list[(int) n2];
+                        list[(int) n2] = t;
+                    }
+                }
+            }
+        }
+    }
+
+    static class Order{
+        public double a;
+        public double b;
+    }
+
+    public static char[] ComputeDay5Part2(char[] input) {
+        char [] output;
+        double n, i, j, o, p;
+        LinkedListStrings ordersLL, listsLL;
+        char[] line;
+        boolean doingOrders;
+        Order [] orders;
+        double [] list;
+
+        ordersLL = CreateLinkedListString();
+        listsLL = CreateLinkedListString();
+
+        StringReference[] lines = SplitByCharacter(input, '\n');
+
+        doingOrders = true;
+        for(i = 0d; i < lines.length; i = i + 1d){
+            line = lines[(int) i].string;
+
+            if(doingOrders) {
+                if (ContainsCharacter(line, '|')) {
+                    LinkedListAddString(ordersLL, line);
+                }
+                if (Trim(line).length == 0d) {
+                    doingOrders = false;
+                }
+            }else{
+                LinkedListAddString(listsLL, line);
+            }
+        }
+
+        n = 0;
+
+        StringReference[] orderLines = LinkedListStringsToArray(ordersLL);
+        StringReference[] listLines = LinkedListStringsToArray(listsLL);
+
+        /*System.out.println("Orders:");
+        for(i = 0d; i < orderLines.length; i = i + 1d){
+            System.out.println(new String(orderLines[(int)i].string));
+        }
+
+        System.out.println("Lists:");
+        for(i = 0d; i < listLines.length; i = i + 1d){
+            System.out.println(new String(listLines[(int)i].string));
+        }*/
+
+        orders = new Order[orderLines.length];
+        for(i = 0d; i < orderLines.length; i = i + 1d){
+            orders[(int)i] = new Order();
+            StringReference[] parts = SplitByCharacter(orderLines[(int)i].string, '|');
+            orders[(int)i].a = CreateNumberFromDecimalString(parts[0].string);
+            orders[(int)i].b = CreateNumberFromDecimalString(parts[1].string);
+        }
+
+        /*for(i = 0d; i < orders.length; i = i + 1d){
+            System.out.println(orders[(int)i].a + " | " + orders[(int)i].b);
+        }*/
+
+        //System.out.println("Lists:");
+        for(i = 0d; i < listLines.length; i = i + 1d){
+            StringReference[] parts = SplitByCharacter(listLines[(int)i].string, ',');
+            list = new double[parts.length];
+            for(j = 0d; j < list.length; j = j + 1d){
+                list[(int)j] = CreateNumberFromDecimalString(parts[(int)j].string);
+                //System.out.print(list[(int)j] + ":");
+            }
+            //System.out.println();
+
+            // Check if valid:
+            boolean valid = IsValid(orders, list);
+
+            //System.out.println("Line " + i + " " + valid);
+
+            if(!valid){
+                Fix(orders, list);
+
+                n = n + list[(int)(floor(list.length / 2d))];
+            }
+        }
+
+        //System.out.println(n);
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static char[] ComputeDay6Part1(char[] input) {
+        char [] output;
+        double n, i, j;
+
+        StringReference[] lines = SplitByCharacter(input, '\n');
+
+        // Run
+        for(;!Iterate(lines);){
+        }
+
+        // Count
+        n = 0;
+        for(i = 0d; i < lines.length; i = i + 1d){
+            for(j = 0d; j < lines[(int)i].string.length; j = j + 1d){
+                if(GetCharacter(lines, i, j) == 'X'){
+                    n = n + 1d;
+                }
+            }
+        }
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static boolean Iterate(StringReference[] field) {
+        double i, j, x, y, w, h;
+        char d, c;
+        boolean found, willExit;
+
+        x = 0;
+        y = 0;
+        d = ' ';
+        h = field.length;
+        w = field[0].string.length;
+
+        // Find
+        found = false;
+        for(i = 0d; i < h && !found; i = i + 1d){
+            for(j = 0d; j < w && !found; j = j + 1d){
+                c = GetCharacter(field, j, i);
+                if(c == '^' || c == '<' || c == '>' || c == 'v'){
+                    x = j;
+                    y = i;
+                    found = true;
+                    d = c;
+                }
+            }
+        }
+
+        // Will exit
+        willExit = false;
+        if(d == '^'){
+            willExit = y == 0;
+        }else if(d == '>'){
+            willExit = x == w - 1d;
+        }else if(d == 'v'){
+            willExit = y == h - 1d;
+        }else if(d == '<'){
+            willExit = x == 0d;
+        }
+
+        if(willExit){
+            SetCharacter(field, x, y, 'X');
+        }else{
+            //PrintField(w, h, field);
+            //System.out.println();
+
+            if(d == '^'){
+                if(GetCharacter(field, x, y-1d) == '#'){
+                    SetCharacter(field, x, y, '>');
+                }else{
+                    SetCharacter(field, x, y, 'X');
+                    SetCharacter(field, x, y-1d, d);
+                }
+            }else if(d == '>'){
+                if(GetCharacter(field, x+1d, y) == '#'){
+                    SetCharacter(field, x, y, 'v');
+                }else{
+                    SetCharacter(field, x, y, 'X');
+                    SetCharacter(field, x+1d, y, d);
+                }
+            }else if(d == 'v'){
+                if(GetCharacter(field, x, y+1d) == '#'){
+                    SetCharacter(field, x, y, '<');
+                }else{
+                    SetCharacter(field, x, y, 'X');
+                    SetCharacter(field, x, y+1d, d);
+                }
+            }else{
+                if(GetCharacter(field, x-1d, y) == '#'){
+                    SetCharacter(field, x, y, '^');
+                }else{
+                    SetCharacter(field, x, y, 'X');
+                    SetCharacter(field, x-1d, y, d);
+                }
+            }
+        }
+
+        return willExit;
+    }
+
+    public static void SetCharacter(StringReference[] field, double x, double y, char c) {
+        field[(int)y].string[(int)x] = c;
+    }
 }
+
 
 
 
