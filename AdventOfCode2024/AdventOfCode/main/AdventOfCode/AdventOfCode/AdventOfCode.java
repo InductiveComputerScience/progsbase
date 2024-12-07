@@ -1,15 +1,16 @@
 package AdventOfCode.AdventOfCode;
 
 import lists.LinkedListCharacters.Structures.LinkedListCharacters;
+import lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions;
 import lists.LinkedListStrings.Structures.LinkedListStrings;
 import references.references.NumberArrayReference;
 import references.references.NumberReference;
 import references.references.StringReference;
 
+import static FormulaTranslation.ArithmeticFormulaEvaluator.ArithmeticFormulaEvaluator.Evaluate;
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
 import static aarrays.arrays.arrays.aCopyString;
-import static java.lang.Math.abs;
-import static java.lang.Math.floor;
+import static java.lang.Math.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
@@ -931,6 +932,125 @@ public class AdventOfCode {
         }
 
         return b;
+    }
+
+    public static char[] ComputeDay7Part1(char[] input) {
+        char [] output, line;
+        double i, o, t, n,  answer, op, result, n2;
+        StringReference[] lines, parts, terms;
+        boolean found;
+
+        n = 0d;
+
+        lines = SplitByCharacter(input, '\n');
+
+        for(i = 0d; i < lines.length; i = i + 1d){
+            line = lines[(int)i].string;
+            parts = SplitByCharacter(line, ':');
+
+            answer = CreateNumberFromDecimalString(parts[0].string);
+
+            parts[1].string = Trim(parts[1].string);
+
+            terms = SplitByCharacter(parts[1].string, ' ');
+
+            found = false;
+            for(o = 0d; o < pow(2, terms.length) && !found; o = o + 1d){
+                op = o;
+
+                result = CreateNumberFromDecimalString(terms[0].string);
+
+                for(t = 1d; t < terms.length; t = t + 1d){
+                    n2 = CreateNumberFromDecimalString(terms[(int)t].string);
+                    if(op % 2d == 0d){
+                        result = result + n2;
+                    }else{
+                        result = result * n2;
+                    }
+                    op = floor(op / 2d);
+                }
+
+                if(result == answer){
+                    found = true;
+                }
+            }
+
+            if(found){
+                n = n + answer;
+            }
+        }
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static char[] ComputeDay7Part2(char[] input) {
+        char [] output, line;
+        double i, o, t, n,  answer, op, result, n2, p;
+        StringReference[] lines, parts, terms;
+        boolean found;
+        double [] termsn;
+
+        n = 0d;
+
+        lines = SplitByCharacter(input, '\n');
+
+        for(i = 0d; i < lines.length; i = i + 1d){
+            line = lines[(int)i].string;
+            parts = SplitByCharacter(line, ':');
+
+            answer = CreateNumberFromDecimalString(parts[0].string);
+
+            parts[1].string = Trim(parts[1].string);
+
+            terms = SplitByCharacter(parts[1].string, ' ');
+
+            termsn = new double [terms.length];
+            for(t = 0d; t < terms.length; t = t + 1d){
+                termsn[(int)t] = CreateNumberFromDecimalString(terms[(int)t].string);
+            }
+
+            found = false;
+            for(o = 0d; o < pow(3d, terms.length-1d) && !found; o = o + 1d){
+                op = o;
+
+                result = termsn[0];
+
+                boolean done = false;
+                for(t = 1d; t < terms.length && !done; t = t + 1d){
+                    n2 = termsn[(int)t];
+                    if(op % 3d == 0d){
+                        result = result * n2;
+                    }else if(op % 3d == 1d){
+                        result = result + n2;
+                    }else{
+                        if(termsn[(int)t] != 0) {
+                            p = 1d;
+                        }else{
+                            p = floor(log10(termsn[(int) t])) + 1d;
+                        }
+
+                        result = result * pow(10d, p) + termsn[(int) t];
+                    }
+                    op = floor(op / 3d);
+                }
+
+                if(result == answer){
+                    found = true;
+                }
+            }
+
+            if(found){
+                n = n + answer;
+            }
+
+            //System.out.println(i + ", " + n);
+        }
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
     }
 }
 
