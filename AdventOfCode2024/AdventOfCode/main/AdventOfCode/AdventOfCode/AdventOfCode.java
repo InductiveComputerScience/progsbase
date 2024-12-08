@@ -1065,16 +1065,13 @@ public class AdventOfCode {
     }
 
     public static char[] ComputeDay8Part1(char[] input) {
-        char [] output, line;
-        double i, o, t, n,  answer, op, result, n2, p, w, h, x, y, cs, j, k, s;
-        StringReference[] field, antinodes, parts, terms;
-        boolean found;
-        double [] termsn;
+        char [] output;
+        double i, n, w, h, x, y, cs, j, k, s;
+        StringReference[] field, antinodes;
         Coordinate[] A, c;
         Coordinate a, b, d, ac;
         char [] chars;
 
-        n = 0d;
         c = new Coordinate[4];
         c[0] = new Coordinate();
         c[1] = new Coordinate();
@@ -1096,10 +1093,9 @@ public class AdventOfCode {
         }
 
         chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
-        //chars = "0".toCharArray();
 
         for(s = 0d; s < chars.length; s = s + 1d) {
-            // Count As
+            // Find Antennas
             cs = 0d;
             for (y = 0d; y < h; y = y + 1d) {
                 for (x = 0d; x < w; x = x + 1d) {
@@ -1158,7 +1154,6 @@ public class AdventOfCode {
                                 SetCharacter(antinodes, ac.x, ac.y, '#');
                             }
                         }
-
                     }
                 }
             }
@@ -1184,17 +1179,13 @@ public class AdventOfCode {
     }
 
     public static char[] ComputeDay8Part2(char[] input) {
-        char [] output, line;
-        double i, o, t, n,  answer, op, result, n2, p, w, h, x, y, cs, j, k, s;
-        StringReference[] field, antinodes, parts, terms;
-        boolean found;
-        double [] termsn;
+        char [] output;
+        double i, n,  w, h, x, y, cs, j, s;
+        StringReference[] field, antinodes;
         Coordinate[] A;
-        Coordinate a, b, c, d, ac, da, db;
+        Coordinate a, b, d, da, db;
         char [] chars;
-
-        n = 0d;
-        c = new Coordinate();
+        
         d = new Coordinate();
         da = new Coordinate();
         db = new Coordinate();
@@ -1213,10 +1204,9 @@ public class AdventOfCode {
         }
 
         chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
-        //chars = "0".toCharArray();
 
         for(s = 0d; s < chars.length; s = s + 1d) {
-            // Count As
+            // Count Antennas
             cs = 0d;
             for (y = 0d; y < h; y = y + 1d) {
                 for (x = 0d; x < w; x = x + 1d) {
@@ -1263,7 +1253,7 @@ public class AdventOfCode {
                                     // Check distance to A
                                     da.x = x - a.x;
                                     da.y = y - a.y;
-                                    if(da.x / d.x ==da.y / d.y){
+                                    if(da.x / d.x == da.y / d.y){
                                         if(IsInteger(da.x / d.x) && IsInteger(da.y / d.y)) {
                                             SetCharacter(antinodes, x, y, '#');
                                         }
@@ -1273,7 +1263,7 @@ public class AdventOfCode {
                                     db.x = x - b.x;
                                     db.y = y - b.y;
 
-                                    if(db.x / d.x ==db.y / d.y) {
+                                    if(db.x / d.x == db.y / d.y) {
                                         if (IsInteger(db.x / d.x) && IsInteger(db.y / d.y)) {
                                             SetCharacter(antinodes, x, y, '#');
                                         }
@@ -1281,7 +1271,6 @@ public class AdventOfCode {
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -1298,8 +1287,8 @@ public class AdventOfCode {
         }
 
         // Print
-        PrintField(field);
-        PrintField(antinodes);
+        //PrintField(field);
+        //PrintField(antinodes);
 
         output = CreateStringDecimalFromNumber(n);
 
