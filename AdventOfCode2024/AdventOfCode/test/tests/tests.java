@@ -193,6 +193,33 @@ M.M.M.M.M.
 
         AssertStringEquals(output, "11387".toCharArray(), failures);
 
+        // Day 8, Part 1
+
+        input = """
+............
+........0...
+.....0......
+.......0....
+....0.......
+......A.....
+............
+............
+........A...
+.........A..
+............
+............""".toCharArray();
+
+        output = ComputeDay8Part1(input);
+
+        AssertStringEquals(output, "14".toCharArray(), failures);
+
+        // Day 8, Part 2
+        output = ComputeDay8Part2(input);
+
+        AssertStringEquals(output, "34".toCharArray(), failures);
+
+        // Done
+
         return failures.numberValue;
     }
 }

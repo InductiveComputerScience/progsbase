@@ -1,18 +1,17 @@
 package AdventOfCode.AdventOfCode;
 
 import lists.LinkedListCharacters.Structures.LinkedListCharacters;
-import lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions;
 import lists.LinkedListStrings.Structures.LinkedListStrings;
 import references.references.NumberArrayReference;
 import references.references.NumberReference;
 import references.references.StringReference;
 
-import static FormulaTranslation.ArithmeticFormulaEvaluator.ArithmeticFormulaEvaluator.Evaluate;
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
 import static aarrays.arrays.arrays.aCopyString;
 import static java.lang.Math.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
+import static math.math.math.IsInteger;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
 import static numbers.StringToNumber.StringToNumber.CreateNumberFromDecimalString;
 import static numbers.StringToNumber.StringToNumber.CreateNumberFromDecimalStringWithCheck;
@@ -397,7 +396,7 @@ public class AdventOfCode {
         StringReference[] field = SplitByCharacter(input, '\n');
 
         w = field.length;
-        h = field[0].string.length;
+        h = GetFieldWidth(field);
 
         n = 0d;
 
@@ -463,7 +462,7 @@ public class AdventOfCode {
         double w, h, x, y;
         StringReference [] rotated;
 
-        w = field[0].string.length;
+        w = GetFieldWidth(field);
         h = field.length;
 
         rotated = new StringReference[(int)h];
@@ -478,15 +477,27 @@ public class AdventOfCode {
         return rotated;
     }
 
-    public static void PrintField(double w, double h, StringReference[] paddedLines) {
-        double y, x;
+    public static void PrintField(StringReference[] field) {
+        double y, x, w, h;
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
 
         for(y = 0; y < h; y++){
             for(x = 0; x < w; x++){
-                System.out.print(GetCharacter(paddedLines, x, y));
+                System.out.print(GetCharacter(field, x, y));
             }
             System.out.println();
         }
+        System.out.println();
+    }
+
+    private static int GetFieldHeight(StringReference[] field) {
+        return field.length;
+    }
+
+    private static int GetFieldWidth(StringReference[] field) {
+        return field[0].string.length;
     }
 
     public static char[] ComputeDay4Part2(char[] input) {
@@ -496,7 +507,7 @@ public class AdventOfCode {
         StringReference[] field = SplitByCharacter(input, '\n');
 
         w = field.length;
-        h = field[0].string.length;
+        h = GetFieldWidth(field);
 
         n = 0d;
 
@@ -802,7 +813,7 @@ public class AdventOfCode {
         x = 0;
         y = 0;
         h = field.length;
-        w = field[0].string.length;
+        w = GetFieldWidth(field);
 
         // Find
         for (i = 0d; i < h; i = i + 1d) {
@@ -893,7 +904,7 @@ public class AdventOfCode {
         field = SplitByCharacter(input, '\n');
 
         h = field.length;
-        w = field[0].string.length;
+        w = GetFieldWidth(field);
 
         // Count
         n = 0;
@@ -1051,6 +1062,253 @@ public class AdventOfCode {
         output = CreateStringDecimalFromNumber(n);
 
         return output;
+    }
+
+    public static char[] ComputeDay8Part1(char[] input) {
+        char [] output, line;
+        double i, o, t, n,  answer, op, result, n2, p, w, h, x, y, cs, j, k, s;
+        StringReference[] field, antinodes, parts, terms;
+        boolean found;
+        double [] termsn;
+        Coordinate[] A, c;
+        Coordinate a, b, d, ac;
+        char [] chars;
+
+        n = 0d;
+        c = new Coordinate[4];
+        c[0] = new Coordinate();
+        c[1] = new Coordinate();
+        c[2] = new Coordinate();
+        c[3] = new Coordinate();
+        d = new Coordinate();
+
+        field = SplitByCharacter(input, '\n');
+
+        antinodes = CopyField(field);
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
+
+        for(y = 0d; y < h; y = y + 1d) {
+            for(x = 0d; x < w; x = x + 1d) {
+                SetCharacter(antinodes, x, y, '.');
+            }
+        }
+
+        chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        //chars = "0".toCharArray();
+
+        for(s = 0d; s < chars.length; s = s + 1d) {
+            // Count As
+            cs = 0d;
+            for (y = 0d; y < h; y = y + 1d) {
+                for (x = 0d; x < w; x = x + 1d) {
+                    if (GetCharacter(field, x, y) == chars[(int)s]) {
+                        cs = cs + 1d;
+                    }
+                }
+            }
+
+            A = new Coordinate[(int) cs];
+            cs = 0d;
+            for (y = 0d; y < h; y = y + 1d) {
+                for (x = 0d; x < w; x = x + 1d) {
+                    if (GetCharacter(field, x, y) == chars[(int)s]) {
+                        A[(int) cs] = new Coordinate();
+                        A[(int) cs].x = x;
+                        A[(int) cs].y = y;
+                        cs = cs + 1d;
+                    }
+                }
+            }
+
+            // Compute anti-nodes
+            for (i = 0; i < A.length; i = i + 1d) {
+                for (j = 0; j < A.length; j = j + 1d) {
+                    if (i != j) {
+                        a = A[(int) i];
+                        b = A[(int) j];
+
+                        // Distance
+                        d.x = a.x - b.x;
+                        d.y = a.y - b.y;
+
+                        // Candidates
+                        c[0].x = a.x + d.x;
+                        c[0].y = a.y + d.y;
+
+                        c[1].x = a.x - d.x;
+                        c[1].y = a.y - d.y;
+
+                        c[2].x = b.x + d.x;
+                        c[2].y = b.y + d.y;
+
+                        c[3].x = b.x - d.x;
+                        c[3].y = b.y - d.y;
+
+                        for (k = 0d; k < 4d; k = k + 1d) {
+                            ac = c[(int) k];
+                            if (ac.x == a.x && ac.y == a.y) {
+                                // Is A
+                            } else if (ac.x == b.x && ac.y == b.y) {
+                                // Is B
+                            } else if (ac.x < 0 || ac.x >= w || ac.y < 0 || ac.y >= h) {
+                                // Is outside
+                            } else {
+                                SetCharacter(antinodes, ac.x, ac.y, '#');
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        // Count anti-nodes
+        n = 0d;
+        for(y = 0d; y < h; y = y + 1d) {
+            for(x = 0d; x < w; x = x + 1d) {
+                if(GetCharacter(antinodes, x, y) == '#'){
+                    n = n + 1d;
+                }
+            }
+        }
+
+        // Print
+        //PrintField(field);
+        //PrintField(antinodes);
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static char[] ComputeDay8Part2(char[] input) {
+        char [] output, line;
+        double i, o, t, n,  answer, op, result, n2, p, w, h, x, y, cs, j, k, s;
+        StringReference[] field, antinodes, parts, terms;
+        boolean found;
+        double [] termsn;
+        Coordinate[] A;
+        Coordinate a, b, c, d, ac, da, db;
+        char [] chars;
+
+        n = 0d;
+        c = new Coordinate();
+        d = new Coordinate();
+        da = new Coordinate();
+        db = new Coordinate();
+
+        field = SplitByCharacter(input, '\n');
+
+        antinodes = CopyField(field);
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
+
+        for(y = 0d; y < h; y = y + 1d) {
+            for(x = 0d; x < w; x = x + 1d) {
+                SetCharacter(antinodes, x, y, '.');
+            }
+        }
+
+        chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        //chars = "0".toCharArray();
+
+        for(s = 0d; s < chars.length; s = s + 1d) {
+            // Count As
+            cs = 0d;
+            for (y = 0d; y < h; y = y + 1d) {
+                for (x = 0d; x < w; x = x + 1d) {
+                    if (GetCharacter(field, x, y) == chars[(int)s]) {
+                        cs = cs + 1d;
+                    }
+                }
+            }
+
+            A = new Coordinate[(int) cs];
+            cs = 0d;
+            for (y = 0d; y < h; y = y + 1d) {
+                for (x = 0d; x < w; x = x + 1d) {
+                    if (GetCharacter(field, x, y) == chars[(int)s]) {
+                        A[(int) cs] = new Coordinate();
+                        A[(int) cs].x = x;
+                        A[(int) cs].y = y;
+                        cs = cs + 1d;
+
+                        SetCharacter(antinodes, x, y, '#');
+                    }
+                }
+            }
+
+            // Compute anti-nodes
+            for (i = 0; i < A.length; i = i + 1d) {
+                for (j = 0; j < A.length; j = j + 1d) {
+                    if (i != j) {
+                        a = A[(int) i];
+                        b = A[(int) j];
+
+                        // Distance
+                        d.x = a.x - b.x;
+                        d.y = a.y - b.y;
+
+                        // Check all points
+                        for (y = 0d; y < h; y = y + 1d) {
+                            for (x = 0d; x < w; x = x + 1d) {
+                                if (x == a.x && y == a.y) {
+                                    // Is A
+                                } else if (x == b.x && y == b.y) {
+                                    // Is B
+                                } else {
+                                    // Check distance to A
+                                    da.x = x - a.x;
+                                    da.y = y - a.y;
+                                    if(da.x / d.x ==da.y / d.y){
+                                        if(IsInteger(da.x / d.x) && IsInteger(da.y / d.y)) {
+                                            SetCharacter(antinodes, x, y, '#');
+                                        }
+                                    }
+
+                                    // Check distance to B
+                                    db.x = x - b.x;
+                                    db.y = y - b.y;
+
+                                    if(db.x / d.x ==db.y / d.y) {
+                                        if (IsInteger(db.x / d.x) && IsInteger(db.y / d.y)) {
+                                            SetCharacter(antinodes, x, y, '#');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        // Count anti-nodes
+        n = 0d;
+        for(y = 0d; y < h; y = y + 1d) {
+            for(x = 0d; x < w; x = x + 1d) {
+                if(GetCharacter(antinodes, x, y) == '#'){
+                    n = n + 1d;
+                }
+            }
+        }
+
+        // Print
+        PrintField(field);
+        PrintField(antinodes);
+
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    static class Coordinate {
+        public double x;
+        public double y;
     }
 }
 
