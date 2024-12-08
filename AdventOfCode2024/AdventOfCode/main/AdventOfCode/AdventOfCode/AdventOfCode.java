@@ -1067,39 +1067,34 @@ public class AdventOfCode {
     public static char[] ComputeDay8Part1(char[] input) {
         char [] output;
         double i, n, w, h, x, y, cs, j, k, s;
-        StringReference[] field, antinodes;
+        StringReference[] field, antiNodes;
         Coordinate[] A, c;
         Coordinate a, b, d, ac;
-        char [] chars;
+        char [] symbols;
 
         c = new Coordinate[4];
-        c[0] = new Coordinate();
-        c[1] = new Coordinate();
-        c[2] = new Coordinate();
-        c[3] = new Coordinate();
-        d = new Coordinate();
 
         field = SplitByCharacter(input, '\n');
 
-        antinodes = CopyField(field);
+        antiNodes = CopyField(field);
 
         w = GetFieldWidth(field);
         h = GetFieldHeight(field);
 
         for(y = 0d; y < h; y = y + 1d) {
             for(x = 0d; x < w; x = x + 1d) {
-                SetCharacter(antinodes, x, y, '.');
+                SetCharacter(antiNodes, x, y, '.');
             }
         }
 
-        chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 
-        for(s = 0d; s < chars.length; s = s + 1d) {
+        for(s = 0d; s < symbols.length; s = s + 1d) {
             // Find Antennas
             cs = 0d;
             for (y = 0d; y < h; y = y + 1d) {
                 for (x = 0d; x < w; x = x + 1d) {
-                    if (GetCharacter(field, x, y) == chars[(int)s]) {
+                    if (GetCharacter(field, x, y) == symbols[(int)s]) {
                         cs = cs + 1d;
                     }
                 }
@@ -1109,10 +1104,8 @@ public class AdventOfCode {
             cs = 0d;
             for (y = 0d; y < h; y = y + 1d) {
                 for (x = 0d; x < w; x = x + 1d) {
-                    if (GetCharacter(field, x, y) == chars[(int)s]) {
-                        A[(int) cs] = new Coordinate();
-                        A[(int) cs].x = x;
-                        A[(int) cs].y = y;
+                    if (GetCharacter(field, x, y) == symbols[(int)s]) {
+                        A[(int)cs] = CreateCoordinate(x, y);
                         cs = cs + 1d;
                     }
                 }
@@ -1122,28 +1115,20 @@ public class AdventOfCode {
             for (i = 0; i < A.length; i = i + 1d) {
                 for (j = 0; j < A.length; j = j + 1d) {
                     if (i != j) {
-                        a = A[(int) i];
-                        b = A[(int) j];
+                        a = A[(int)i];
+                        b = A[(int)j];
 
                         // Distance
-                        d.x = a.x - b.x;
-                        d.y = a.y - b.y;
+                        d = SubCoordinates(a, b);
 
                         // Candidates
-                        c[0].x = a.x + d.x;
-                        c[0].y = a.y + d.y;
-
-                        c[1].x = a.x - d.x;
-                        c[1].y = a.y - d.y;
-
-                        c[2].x = b.x + d.x;
-                        c[2].y = b.y + d.y;
-
-                        c[3].x = b.x - d.x;
-                        c[3].y = b.y - d.y;
+                        c[0] = AddCoordinates(a, d);
+                        c[1] = SubCoordinates(a, d);
+                        c[2] = AddCoordinates(b, d);
+                        c[3] = SubCoordinates(b, d);
 
                         for (k = 0d; k < 4d; k = k + 1d) {
-                            ac = c[(int) k];
+                            ac = c[(int)k];
                             if (ac.x == a.x && ac.y == a.y) {
                                 // Is A
                             } else if (ac.x == b.x && ac.y == b.y) {
@@ -1151,7 +1136,7 @@ public class AdventOfCode {
                             } else if (ac.x < 0 || ac.x >= w || ac.y < 0 || ac.y >= h) {
                                 // Is outside
                             } else {
-                                SetCharacter(antinodes, ac.x, ac.y, '#');
+                                SetCharacter(antiNodes, ac.x, ac.y, '#');
                             }
                         }
                     }
@@ -1163,7 +1148,7 @@ public class AdventOfCode {
         n = 0d;
         for(y = 0d; y < h; y = y + 1d) {
             for(x = 0d; x < w; x = x + 1d) {
-                if(GetCharacter(antinodes, x, y) == '#'){
+                if(GetCharacter(antiNodes, x, y) == '#'){
                     n = n + 1d;
                 }
             }
@@ -1171,46 +1156,58 @@ public class AdventOfCode {
 
         // Print
         //PrintField(field);
-        //PrintField(antinodes);
+        //PrintField(antiNodes);
 
         output = CreateStringDecimalFromNumber(n);
 
         return output;
     }
 
+    public static Coordinate AddCoordinates(Coordinate a, Coordinate b) {
+        Coordinate c;
+        c = new Coordinate();
+        c.x = a.x + b.x;
+        c.y = a.y + b.y;
+        return c;
+    }
+
+    public static Coordinate SubCoordinates(Coordinate a, Coordinate b) {
+        Coordinate c;
+        c = new Coordinate();
+        c.x = a.x - b.x;
+        c.y = a.y - b.y;
+        return c;
+    }
+
     public static char[] ComputeDay8Part2(char[] input) {
         char [] output;
         double i, n,  w, h, x, y, cs, j, s;
-        StringReference[] field, antinodes;
+        StringReference[] field, antiNodes;
         Coordinate[] A;
-        Coordinate a, b, d, da, db;
-        char [] chars;
-        
-        d = new Coordinate();
-        da = new Coordinate();
-        db = new Coordinate();
+        Coordinate a, b, d, da, db, p;
+        char [] symbols;
 
         field = SplitByCharacter(input, '\n');
 
-        antinodes = CopyField(field);
+        antiNodes = CopyField(field);
 
         w = GetFieldWidth(field);
         h = GetFieldHeight(field);
 
         for(y = 0d; y < h; y = y + 1d) {
             for(x = 0d; x < w; x = x + 1d) {
-                SetCharacter(antinodes, x, y, '.');
+                SetCharacter(antiNodes, x, y, '.');
             }
         }
 
-        chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+        symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 
-        for(s = 0d; s < chars.length; s = s + 1d) {
+        for(s = 0d; s < symbols.length; s = s + 1d) {
             // Count Antennas
             cs = 0d;
             for (y = 0d; y < h; y = y + 1d) {
                 for (x = 0d; x < w; x = x + 1d) {
-                    if (GetCharacter(field, x, y) == chars[(int)s]) {
+                    if (GetCharacter(field, x, y) == symbols[(int)s]) {
                         cs = cs + 1d;
                     }
                 }
@@ -1220,13 +1217,9 @@ public class AdventOfCode {
             cs = 0d;
             for (y = 0d; y < h; y = y + 1d) {
                 for (x = 0d; x < w; x = x + 1d) {
-                    if (GetCharacter(field, x, y) == chars[(int)s]) {
-                        A[(int) cs] = new Coordinate();
-                        A[(int) cs].x = x;
-                        A[(int) cs].y = y;
+                    if (GetCharacter(field, x, y) == symbols[(int)s]) {
+                        A[(int)cs] = CreateCoordinate(x, y);
                         cs = cs + 1d;
-
-                        SetCharacter(antinodes, x, y, '#');
                     }
                 }
             }
@@ -1235,38 +1228,31 @@ public class AdventOfCode {
             for (i = 0; i < A.length; i = i + 1d) {
                 for (j = 0; j < A.length; j = j + 1d) {
                     if (i != j) {
-                        a = A[(int) i];
-                        b = A[(int) j];
+                        a = A[(int)i];
+                        b = A[(int)j];
 
                         // Distance
-                        d.x = a.x - b.x;
-                        d.y = a.y - b.y;
+                        d = SubCoordinates(a, b);
 
                         // Check all points
                         for (y = 0d; y < h; y = y + 1d) {
                             for (x = 0d; x < w; x = x + 1d) {
-                                if (x == a.x && y == a.y) {
-                                    // Is A
-                                } else if (x == b.x && y == b.y) {
-                                    // Is B
-                                } else {
-                                    // Check distance to A
-                                    da.x = x - a.x;
-                                    da.y = y - a.y;
-                                    if(da.x / d.x == da.y / d.y){
-                                        if(IsInteger(da.x / d.x) && IsInteger(da.y / d.y)) {
-                                            SetCharacter(antinodes, x, y, '#');
-                                        }
+                                p = CreateCoordinate(x, y);
+
+                                // Check distance to A
+                                da = SubCoordinates(p, a);
+                                if(da.x / d.x == da.y / d.y){
+                                    if(IsInteger(da.x / d.x) && IsInteger(da.y / d.y)) {
+                                        SetCharacter(antiNodes, x, y, '#');
                                     }
+                                }
 
-                                    // Check distance to B
-                                    db.x = x - b.x;
-                                    db.y = y - b.y;
+                                // Check distance to B
+                                db = SubCoordinates(p, b);
 
-                                    if(db.x / d.x == db.y / d.y) {
-                                        if (IsInteger(db.x / d.x) && IsInteger(db.y / d.y)) {
-                                            SetCharacter(antinodes, x, y, '#');
-                                        }
+                                if(db.x / d.x == db.y / d.y) {
+                                    if (IsInteger(db.x / d.x) && IsInteger(db.y / d.y)) {
+                                        SetCharacter(antiNodes, x, y, '#');
                                     }
                                 }
                             }
@@ -1280,7 +1266,7 @@ public class AdventOfCode {
         n = 0d;
         for(y = 0d; y < h; y = y + 1d) {
             for(x = 0d; x < w; x = x + 1d) {
-                if(GetCharacter(antinodes, x, y) == '#'){
+                if(GetCharacter(antiNodes, x, y) == '#'){
                     n = n + 1d;
                 }
             }
@@ -1288,11 +1274,19 @@ public class AdventOfCode {
 
         // Print
         //PrintField(field);
-        //PrintField(antinodes);
+        //PrintField(antiNodes);
 
         output = CreateStringDecimalFromNumber(n);
 
         return output;
+    }
+
+    public static Coordinate CreateCoordinate(double x, double y) {
+        Coordinate c;
+        c = new Coordinate();
+        c.x = x;
+        c.y = y;
+        return c;
     }
 
     static class Coordinate {
