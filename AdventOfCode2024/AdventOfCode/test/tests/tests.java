@@ -218,6 +218,20 @@ M.M.M.M.M.
 
         AssertStringEquals(output, "34".toCharArray(), failures);
 
+        // Day 9, Part 1
+
+        input = "2333133121414131402".toCharArray();
+
+        output = ComputeDay9Part1(input);
+
+        AssertStringEquals(output, "1928".toCharArray(), failures);
+
+        // Day 9, Part 2
+
+        output = ComputeDay9Part2(input);
+
+        AssertStringEquals(output, "2858".toCharArray(), failures);
+
         // Done
 
         return failures.numberValue;

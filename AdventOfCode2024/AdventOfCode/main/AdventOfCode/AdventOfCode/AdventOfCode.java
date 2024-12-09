@@ -8,6 +8,7 @@ import references.references.StringReference;
 
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
 import static aarrays.arrays.arrays.aCopyString;
+import static charCharacters.Characters.Characters.charCharacterToDecimalDigit;
 import static java.lang.Math.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
@@ -1065,14 +1066,13 @@ public class AdventOfCode {
     }
 
     public static char[] ComputeDay8Part1(char[] input) {
-        char [] output;
+        char [] output, symbols;
         double i, n, w, h, x, y, cs, j, k, s;
         StringReference[] field, antiNodes;
         Coordinate[] A, c;
         Coordinate a, b, d, ac;
-        char [] symbols;
 
-        c = new Coordinate[4];
+        c = new Coordinate[2];
 
         field = SplitByCharacter(input, '\n');
 
@@ -1123,17 +1123,11 @@ public class AdventOfCode {
 
                         // Candidates
                         c[0] = AddCoordinates(a, d);
-                        c[1] = SubCoordinates(a, d);
-                        c[2] = AddCoordinates(b, d);
-                        c[3] = SubCoordinates(b, d);
+                        c[1] = SubCoordinates(b, d);
 
-                        for (k = 0d; k < 4d; k = k + 1d) {
+                        for (k = 0d; k < c.length; k = k + 1d) {
                             ac = c[(int)k];
-                            if (ac.x == a.x && ac.y == a.y) {
-                                // Is A
-                            } else if (ac.x == b.x && ac.y == b.y) {
-                                // Is B
-                            } else if (ac.x < 0 || ac.x >= w || ac.y < 0 || ac.y >= h) {
+                            if (ac.x < 0 || ac.x >= w || ac.y < 0 || ac.y >= h) {
                                 // Is outside
                             } else {
                                 SetCharacter(antiNodes, ac.x, ac.y, '#');
@@ -1180,12 +1174,11 @@ public class AdventOfCode {
     }
 
     public static char[] ComputeDay8Part2(char[] input) {
-        char [] output;
+        char [] output, symbols;
         double i, n,  w, h, x, y, cs, j, s;
         StringReference[] field, antiNodes;
         Coordinate[] A;
         Coordinate a, b, d, da, db, p;
-        char [] symbols;
 
         field = SplitByCharacter(input, '\n');
 
@@ -1292,6 +1285,204 @@ public class AdventOfCode {
     static class Coordinate {
         public double x;
         public double y;
+    }
+
+    public static char[] ComputeDay9Part1(char[] input) {
+        double n, len, i, id, blocks, free, p, j;
+        char [] output;
+        double [] ids;
+        boolean swapped, done;
+
+        // Compute length
+        len = 0;
+        for(i = 0; i < input.length; i = i + 1d){
+            blocks = charCharacterToDecimalDigit(input[(int)i]);
+            len = len + blocks;
+        }
+
+        // Create disk map
+        ids = new double[(int)len];
+
+        p = 0d;
+        id = 0d;
+        for(i = 0; i < input.length; i = i + 2d){
+            blocks = charCharacterToDecimalDigit(input[(int)i]);
+            free = 0d;
+            if(i + 1d < input.length) {
+                free = charCharacterToDecimalDigit(input[(int) (i + 1d)]);
+            }
+
+            for(j = 0d; j < blocks; j = j + 1d){
+                ids[(int)p] = id;
+                p = p + 1d;
+            }
+
+            for(j = 0d; j < free; j = j + 1d){
+                ids[(int)p] = -1d;
+                p = p + 1d;
+            }
+
+            id = id + 1d;
+        }
+
+        // Print
+        //PrintDisk(len, ids);
+
+        // Compact
+        done = false;
+        for(i = len-1d; i >= 0 && !done; i = i - 1d){
+            if(ids[(int)i] != -1) {
+                swapped = false;
+                for (j = 0d; j < len && j < i && !swapped; j = j + 1d) {
+                    if (ids[(int) j] == -1) {
+                        ids[(int) j] = ids[(int) i];
+                        ids[(int) i] = -1;
+                        swapped = true;
+                    }
+                }
+
+                if(!swapped){
+                    done = true;
+                }
+
+                //PrintDisk(len, ids);
+            }
+        }
+
+        // Compute checksum
+        n = 0;
+        for (i = 0d; i < len; i = i + 1d) {
+            id = ids[(int) i];
+            if(id != -1) {
+                n = n + i * id;
+            }
+        }
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static void PrintDisk(double len, double[] ids) {
+        double i;
+        for(i = 0; i < len; i = i + 1d){
+            if(ids[(int)i] != -1) {
+                System.out.print((int) ids[(int) i]);
+            }else{
+                System.out.print('.');
+            }
+        }
+        System.out.println();
+    }
+
+    public static char[] ComputeDay9Part2(char[] input) {
+        double n, len, i, id, blocks, free, p, j, maxid, freespace;
+        char [] output;
+        double [] ids;
+        boolean done;
+        File file;
+        File [] files;
+
+        // Compute length
+        len = 0;
+        for(i = 0; i < input.length; i = i + 1d){
+            blocks = charCharacterToDecimalDigit(input[(int)i]);
+            len = len + blocks;
+        }
+
+        ids = new double[(int)len];
+        files = new File[(int)len];
+
+        p = 0d;
+        id = 0d;
+        maxid = 0d;
+        for(i = 0; i < input.length; i = i + 2d){
+            file = new File();
+            files[(int)id] = file;
+
+            blocks = charCharacterToDecimalDigit(input[(int)i]);
+            free = 0d;
+            if(i + 1d < input.length) {
+                free = charCharacterToDecimalDigit(input[(int) (i + 1d)]);
+            }
+
+            file.id = id;
+            file.pos = p;
+            file.length = blocks;
+
+            for(j = 0d; j < blocks; j = j + 1d){
+                ids[(int)p] = id;
+                p = p + 1d;
+            }
+
+            for(j = 0d; j < free; j = j + 1d){
+                ids[(int)p] = -1d;
+                p = p + 1d;
+            }
+
+            maxid = id;
+            id = id + 1d;
+
+            //System.out.println((int)file.id + ", " + (int)file.pos + ", " + (int)file.length);
+        }
+
+        // Print
+        //PrintDisk(len, ids);
+
+        // Compact
+        for(i = maxid; i >= 0; i = i - 1d){
+            file = files[(int)i];
+
+            // Find free block
+            done = false;
+            freespace = 0;
+            p = 0d;
+            for(j = 0d; j < len && !done; j = j + 1d){
+                if(ids[(int)j] == -1){
+                    freespace = freespace + 1d;
+                }else{
+                    freespace = 0d;
+                    p = j+1d;
+                }
+
+                if(freespace == file.length){
+                    done = true;
+                }
+            }
+
+            // Move file
+            if(done){
+                if(p < file.pos) {
+                    for (j = 0d; j < file.length; j = j + 1d) {
+                        ids[(int) (p + j)] = i;
+                        ids[(int) (file.pos + j)] = -1;
+                    }
+                }
+            }
+
+            //PrintDisk(len, ids);
+        }
+
+        // Compute checksum
+        n = 0;
+        for (i = 0d; i < len; i = i + 1d) {
+            id = ids[(int) i];
+            if(id != -1) {
+                n = n + i * id;
+            }
+        }
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    static class File{
+        public double id;
+        public double pos;
+        public double length;
     }
 }
 
