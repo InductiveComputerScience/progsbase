@@ -9,6 +9,7 @@ import references.references.StringReference;
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
 import static aarrays.arrays.arrays.aCopyString;
 import static charCharacters.Characters.Characters.charCharacterToDecimalDigit;
+import static charCharacters.Characters.Characters.charDecimalDigitToCharacter;
 import static java.lang.Math.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
@@ -1484,7 +1485,128 @@ public class AdventOfCode {
         public double pos;
         public double length;
     }
+
+    public static char[] ComputeDay10Part1(char[] input) {
+        char [] output;
+        double n, x, y, w, h, score;
+        StringReference [] field, newField;
+
+        n = 0d;
+
+        field = SplitByCharacter(input, '\n');
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
+
+        for(y = 0d; y < h; y = y + 1d){
+            for(x = 0d; x < w; x = x + 1d){
+                if(GetCharacter(field, x, y) == '0'){
+                    // Found trail head
+                    newField = CopyField(field);
+
+                    score = IterateTrail(newField, x, y, '0', true);
+
+                    //System.out.println(score);
+                    n = n + score;
+                }
+            }
+        }
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static double IterateTrail(StringReference[] field, double x, double y, char c, boolean clearEnd) {
+        double w, h, score;
+        char nc;
+
+        score = 0d;
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
+
+        if(x >= 0d && x < w && y >= 0d && y < h) {
+            if (GetCharacter(field, x, y) == c) {
+                //PrintField(field);
+                if(c == '9'){
+                    score = score + 1d;
+                    if(clearEnd) {
+                        SetCharacter(field, x, y, 'X');
+                    }
+                }else{
+                    SetCharacter(field, x, y, '.');
+
+                    nc = NextChar(c);
+
+                    score = score + IterateTrail(field, x - 1d, y, nc, clearEnd);
+                    score = score + IterateTrail(field, x + 1d, y, nc, clearEnd);
+                    score = score + IterateTrail(field, x, y - 1d, nc, clearEnd);
+                    score = score + IterateTrail(field, x, y + 1d, nc, clearEnd);
+
+                    SetCharacter(field, x, y, c);
+                }
+            }
+        }
+
+        return score;
+    }
+
+    public static char NextChar(char c) {
+        double n;
+
+        n = charCharacterToDecimalDigit(c);
+        n = n + 1d;
+        c = charDecimalDigitToCharacter(n);
+
+        return c;
+    }
+
+    public static char[] ComputeDay10Part2(char[] input) {
+        char [] output;
+        double n, x, y, w, h, score;
+        StringReference [] field, newField;
+
+        n = 0d;
+
+        field = SplitByCharacter(input, '\n');
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
+
+        for(y = 0d; y < h; y = y + 1d){
+            for(x = 0d; x < w; x = x + 1d){
+                if(GetCharacter(field, x, y) == '0'){
+                    // Found trail head
+                    newField = CopyField(field);
+                    score = IterateTrail(newField, x, y, '0', false);
+
+                    //System.out.println(score);
+                    n = n + score;
+                }
+            }
+        }
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

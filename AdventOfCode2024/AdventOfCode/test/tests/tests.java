@@ -232,6 +232,28 @@ M.M.M.M.M.
 
         AssertStringEquals(output, "2858".toCharArray(), failures);
 
+        // Day 10, Part 1
+
+        input = """
+89010123
+78121874
+87430965
+96549874
+45678903
+32019012
+01329801
+10456732""".toCharArray();
+
+        output = ComputeDay10Part1(input);
+
+        AssertStringEquals(output, "36".toCharArray(), failures);
+
+        // Day 10, part 2
+
+        output = ComputeDay10Part2(input);
+
+        AssertStringEquals(output, "81".toCharArray(), failures);
+
         // Done
 
         return failures.numberValue;
