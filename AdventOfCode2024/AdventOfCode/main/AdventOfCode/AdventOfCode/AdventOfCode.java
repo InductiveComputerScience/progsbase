@@ -1531,21 +1531,17 @@ public class AdventOfCode {
             if (GetCharacter(field, x, y) == c) {
                 //PrintField(field);
                 if(c == '9'){
-                    score = score + 1d;
+                    score = 1d;
                     if(clearEnd) {
                         SetCharacter(field, x, y, 'X');
                     }
                 }else{
-                    SetCharacter(field, x, y, '.');
-
                     nc = NextChar(c);
 
                     score = score + IterateTrail(field, x - 1d, y, nc, clearEnd);
                     score = score + IterateTrail(field, x + 1d, y, nc, clearEnd);
                     score = score + IterateTrail(field, x, y - 1d, nc, clearEnd);
                     score = score + IterateTrail(field, x, y + 1d, nc, clearEnd);
-
-                    SetCharacter(field, x, y, c);
                 }
             }
         }
