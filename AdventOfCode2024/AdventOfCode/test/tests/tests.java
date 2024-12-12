@@ -254,6 +254,44 @@ M.M.M.M.M.
 
         AssertStringEquals(output, "81".toCharArray(), failures);
 
+        // Day 11, Part 1
+
+        input = "125 17".toCharArray();
+
+        output = ComputeDay11Part1(input);
+
+        AssertStringEquals(output, "55312".toCharArray(), failures);
+
+        // Day 11, Part 2
+
+        output = ComputeDay11Part2(input);
+
+        AssertStringEquals(output, "65601038650482".toCharArray(), failures);
+
+        // Day 12, Part 1
+
+        input = """
+RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE""".toCharArray();
+
+        output = ComputeDay12Part1(input);
+
+        AssertStringEquals(output, "1930".toCharArray(), failures);
+
+        // Day 12, Part 2
+
+        output = ComputeDay12Part2(input);
+
+        AssertStringEquals(output, "1206".toCharArray(), failures);
+
         // Done
 
         return failures.numberValue;

@@ -1,21 +1,14 @@
 package AdventOfCode.AdventOfCode;
 
 import DataStructures.Array.Structures.Data;
-import DataStructures.Array.Structures.Structure;
 import Trees.RedBlackTrees.RedBlackNode;
 import Trees.RedBlackTrees.RedBlackTree;
 import lists.LinkedListCharacters.Structures.LinkedListCharacters;
-import lists.LinkedListNumbers.Structures.LinkedListNodeNumbers;
-import lists.LinkedListNumbers.Structures.LinkedListNumbers;
 import lists.LinkedListStrings.Structures.LinkedListStrings;
-import map.DecimalMaps.DecimalMap;
 import references.references.BooleanReference;
 import references.references.NumberArrayReference;
 import references.references.NumberReference;
 import references.references.StringReference;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static DataStructures.Array.Structures.Structures.*;
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
@@ -25,9 +18,7 @@ import static charCharacters.Characters.Characters.charCharacterToDecimalDigit;
 import static charCharacters.Characters.Characters.charDecimalDigitToCharacter;
 import static java.lang.Math.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
-import static lists.LinkedListNumbers.LinkedListNumbersFunctions.LinkedListNumbersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
-import static map.DecimalMaps.DecimalMaps.*;
 import static math.math.math.IsInteger;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
 import static numbers.StringToNumber.StringToNumber.*;
@@ -1661,11 +1652,11 @@ public class AdventOfCode {
         found = CreateBooleanReference(false);
 
         key = n * maxDepth + depth;
-        keyStr = CreateStringDecimalFromNumber(key);
 
         if (depth == maxDepth) {
             count = 1d;
         }else {
+            keyStr = CreateStringDecimalFromNumber(key);
             node = Search(cache, keyStr, found);
 
             if(found.booleanValue){
@@ -1694,6 +1685,247 @@ public class AdventOfCode {
         }
 
         return count;
+    }
+
+    public static char[] ComputeDay12Part1(char[] input) {
+        char [] output;
+        double n;
+        boolean found;
+        NumberReference areaRef, perimRef;
+        StringReference [] field;
+
+        // Read numbers into array
+        field = SplitByCharacter(input, '\n');
+
+        // Find fields
+        n = 0d;
+        found = true;
+        areaRef = new NumberReference();
+        perimRef = new NumberReference();
+
+        for(;found;){
+            found = FindField(field, areaRef, perimRef);
+            if(found){
+                n = n + areaRef.numberValue * perimRef.numberValue;
+            }
+        }
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static boolean FindField(StringReference[] field, NumberReference areaRef, NumberReference perimRef) {
+        boolean found;
+        double w, h, x, y, cx, cy;
+        char c;
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
+
+        c = ' ';
+        cx = 0d;
+        cy = 0d;
+        areaRef.numberValue = 0d;
+        perimRef.numberValue = 0d;
+
+        // Find unspent field
+        found = false;
+        for(y = 0d; y < h && !found; y = y + 1d){
+            for(x = 0d; x < w && !found; x = x + 1d){
+                c = GetCharacter(field, x, y);
+                if(c != '.'){
+                    cx = x;
+                    cy = y;
+                    found = true;
+                }
+            }
+        }
+
+        if(found){
+            RecurseField(field, c, cx, cy, areaRef, perimRef);
+            ClearFoundField(field, cx, cy);
+        }
+
+        return found;
+    }
+
+    public static void ClearFoundField(StringReference[] field, double x, double y) {
+        char cc;
+
+        cc = GetCharacterWithBoundsCheck(field, x, y);
+        if (cc == '*') {
+            SetCharacter(field, x, y, '.');
+
+            ClearFoundField(field, x + 1d, y);
+            ClearFoundField(field, x - 1d, y);
+            ClearFoundField(field, x, y + 1d);
+            ClearFoundField(field, x, y - 1d);
+        }
+    }
+
+    public static void RecurseField(StringReference[] field, char c, double x, double y, NumberReference areaRef, NumberReference perimRef) {
+        double edge;
+
+        if (GetCharacterWithBoundsCheck(field, x, y) == c) {
+            SetCharacter(field, x, y, '*');
+
+            // Compute area
+            areaRef.numberValue = areaRef.numberValue + 1d;
+
+            // Compute perimeter
+            edge = 0d;
+            if(!IsSameField(field, x+1d, y, c)){
+                edge = edge + 1d;
+            }
+            if(!IsSameField(field, x-1d, y, c)){
+                edge = edge + 1d;
+            }
+            if(!IsSameField(field, x, y+1d, c)){
+                edge = edge + 1d;
+            }
+            if(!IsSameField(field, x, y-1d, c)){
+                edge = edge + 1d;
+            }
+
+            perimRef.numberValue = perimRef.numberValue + edge;
+
+            // Recurse
+            RecurseField(field, c, x + 1d, y, areaRef, perimRef);
+            RecurseField(field, c, x - 1d, y, areaRef, perimRef);
+            RecurseField(field, c, x, y + 1d, areaRef, perimRef);
+            RecurseField(field, c, x, y - 1d, areaRef, perimRef);
+        }
+    }
+
+    public static boolean IsSameField(StringReference[] field, double x, double y, char c) {
+        return GetCharacterWithBoundsCheck(field, x, y) == c || GetCharacterWithBoundsCheck(field, x, y) == '*';
+    }
+
+    public static char GetCharacterWithBoundsCheck(StringReference[] field, double x, double y) {
+        char c;
+        double w, h;
+
+        c = ' ';
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
+
+        if (x >= 0d && x < w && y >= 0d && y < h) {
+            c = field[(int) y].string[(int) x];
+        }
+
+        return c;
+    }
+
+    public static char[] ComputeDay12Part2(char[] input) {
+        char [] output;
+        double n;
+        boolean found;
+        NumberReference areaRef, perimRef;
+        StringReference[] field;
+
+        // Read numbers into array
+        field = SplitByCharacter(input, '\n');
+
+        // Compute fields
+        n = 0d;
+        found = true;
+        areaRef = new NumberReference();
+        perimRef = new NumberReference();
+        for(;found;){
+            found = FindField2(field, areaRef, perimRef);
+            if(found){
+                n = n + areaRef.numberValue * perimRef.numberValue;
+            }
+        }
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static boolean FindField2(StringReference[] field, NumberReference areaRef, NumberReference perimRef) {
+        boolean found;
+        double w, h, x, y, cx, cy;
+        char c;
+
+        w = GetFieldWidth(field);
+        h = GetFieldHeight(field);
+
+        c = ' ';
+        cx = 0d;
+        cy = 0d;
+        areaRef.numberValue = 0d;
+        perimRef.numberValue = 0d;
+
+        // Find unspent field
+        found = false;
+        for(y = 0d; y < h && !found; y = y + 1d){
+            for(x = 0d; x < w && !found; x = x + 1d){
+                c = GetCharacter(field, x, y);
+                if(c != '.'){
+                    cx = x;
+                    cy = y;
+                    found = true;
+                }
+            }
+        }
+
+        if(found){
+            RecurseField2(field, c, cx, cy, areaRef, perimRef);
+            ClearFoundField(field, cx, cy);
+        }
+
+        return found;
+    }
+
+    public static void RecurseField2(StringReference[] field, char c, double x, double y, NumberReference areaRef, NumberReference perimRef) {
+        double corner;
+
+        if (GetCharacterWithBoundsCheck(field, x, y) == c) {
+            SetCharacter(field, x, y, '*');
+
+            // Compute area
+            areaRef.numberValue = areaRef.numberValue + 1d;
+
+            // Compute corners
+            corner = 0d;
+            // up, right
+            if(!IsSameField(field, x, y-1d, c) && !IsSameField(field, x+1d, y, c)){
+                corner = corner + 1d;
+            }else if(IsSameField(field, x, y-1d, c) && IsSameField(field, x+1d, y, c) && !IsSameField(field, x+1d, y-1d, c)){
+                corner = corner + 1d;
+            }
+            // down, right
+            if(!IsSameField(field, x, y+1d, c) && !IsSameField(field, x+1d, y, c)){
+                corner = corner + 1d;
+            }else if(IsSameField(field, x, y+1d, c) && IsSameField(field, x+1d, y, c) && !IsSameField(field, x+1d, y+1d, c)){
+                corner = corner + 1d;
+            }
+            // down, left
+            if(!IsSameField(field, x, y+1d, c) && !IsSameField(field, x-1d, y, c)){
+                corner = corner + 1d;
+            }else if(IsSameField(field, x, y+1d, c) && IsSameField(field, x-1d, y, c) && !IsSameField(field, x-1d, y+1d, c)){
+                corner = corner + 1d;
+            }
+            // up, left
+            if(!IsSameField(field, x, y-1d, c) && !IsSameField(field, x-1d, y, c)){
+                corner = corner + 1d;
+            }else if(IsSameField(field, x, y-1d, c) && IsSameField(field, x-1d, y, c) && !IsSameField(field, x-1d, y-1d, c)){
+                corner = corner + 1d;
+            }
+
+            perimRef.numberValue = perimRef.numberValue + corner;
+
+            // Recurse
+            RecurseField2(field, c, x + 1d, y, areaRef, perimRef);
+            RecurseField2(field, c, x - 1d, y, areaRef, perimRef);
+            RecurseField2(field, c, x, y + 1d, areaRef, perimRef);
+            RecurseField2(field, c, x, y - 1d, areaRef, perimRef);
+        }
     }
 }
 
