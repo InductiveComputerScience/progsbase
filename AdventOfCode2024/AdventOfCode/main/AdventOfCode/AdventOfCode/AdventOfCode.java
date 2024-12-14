@@ -19,6 +19,7 @@ import static charCharacters.Characters.Characters.charDecimalDigitToCharacter;
 import static java.lang.Math.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
+import static math.math.math.GreatestCommonDivisor;
 import static math.math.math.IsInteger;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
 import static numbers.StringToNumber.StringToNumber.*;
@@ -1926,6 +1927,133 @@ public class AdventOfCode {
             RecurseField2(field, c, x, y + 1d, areaRef, perimRef);
             RecurseField2(field, c, x, y - 1d, areaRef, perimRef);
         }
+    }
+
+    public static char[] ComputeDay13Part1(char[] input) {
+        return ComputeDay13(input, 0d);
+    }
+
+    public static char[] ComputeDay13Part2(char[] input) {
+        return ComputeDay13(input, 10000000000000d);
+    }
+
+    public static char[] ComputeDay13(char[] input, double add) {
+        char [] output, line;
+        double n, i, puzzles, pnr, cost;
+        StringReference[] lines, parts, p2, p3;
+        Puzzle p;
+        Puzzle [] ps;
+
+        // Read numbers into array
+        lines = SplitByCharacter(input, '\n');
+
+        // Count
+        puzzles = ceil(lines.length / 4d);
+        ps = new Puzzle[(int)puzzles];
+
+        pnr = 0;
+        for(i = 0; i < lines.length; i = i + 2d){
+            p = new Puzzle();
+
+            // Button A
+            line = lines[(int)i].string;
+            parts = SplitByCharacter(line, ',');
+            p2 = SplitByCharacter(parts[0].string, '+');
+            p3 = SplitByCharacter(parts[1].string, '+');
+
+            p.a = new Coordinate();
+            p.a.x = CreateNumberFromDecimalString(p2[1].string);
+            p.a.y = CreateNumberFromDecimalString(p3[1].string);
+
+            // Button B
+            i = i + 1d;
+            line = lines[(int)i].string;
+            parts = SplitByCharacter(line, ',');
+            p2 = SplitByCharacter(parts[0].string, '+');
+            p3 = SplitByCharacter(parts[1].string, '+');
+
+            p.b = new Coordinate();
+            p.b.x = CreateNumberFromDecimalString(p2[1].string);
+            p.b.y = CreateNumberFromDecimalString(p3[1].string);
+
+            // Prize
+            i = i + 1d;
+            line = lines[(int)i].string;
+            parts = SplitByCharacter(line, ',');
+            p2 = SplitByCharacter(parts[0].string, '=');
+            p3 = SplitByCharacter(parts[1].string, '=');
+
+            p.c = new Coordinate();
+            p.c.x = CreateNumberFromDecimalString(p2[1].string);
+            p.c.y = CreateNumberFromDecimalString(p3[1].string);
+
+            p.c.x = p.c.x + add;
+            p.c.y = p.c.y + add;
+
+            ps[(int)pnr] = p;
+            pnr = pnr + 1d;
+        }
+
+        // Solve puzzle
+        n = 0d;
+        for(i = 0d; i < puzzles; i = i + 1d){
+            p = ps[(int)i];
+
+            cost = FindPuzzleSolutions(p);
+
+            n = n + cost;
+        }
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static void PrintCoordinate(Coordinate sum) {
+        System.out.println((long)sum.x + ", " + (long)sum.y);
+    }
+
+    static class Puzzle{
+        public Coordinate a;
+        public Coordinate b;
+        public Coordinate c;
+    }
+
+    /*
+       x*a + y*b = m   :a = ax, b = bx, m = cx
+       x*c + y*d = n   :c = ay, d = by, n = cy
+
+       x*a = m - y*b
+       x = (m - y*b)/a               (1)
+
+       c*(m - y*b)/a + y*d = n
+       c*(m - y*b) + y*d*a = n*a
+       c*m - c*y*b + y*d*a = n*a
+       c*m + y*d*a - c*y*b = n*a
+       c*m + y*(d*a - c*b) = n*a
+       y*(d*a - c*b) = n*a - c*m
+       y = (n*a - c*m)/(d*a - c*b)   (2)
+    */
+
+    public static double FindPuzzleSolutions(Puzzle p) {
+        double cost, x, y;
+        Coordinate a, b, c;
+
+        cost = 0d;
+
+        a = p.a;
+        b = p.b;
+        c = p.c;
+
+        y = (c.y * a.x - a.y * c.x) / (b.y * a.x - a.y * b.x);
+        x = (c.x - y*b.x)/a.x;
+
+        if(IsInteger(x) && IsInteger(y)){
+            cost = x * 3d + y;
+        }
+
+        return cost;
     }
 }
 
