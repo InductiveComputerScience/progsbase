@@ -1,6 +1,7 @@
 package AdventOfCode.AdventOfCode;
 
 import DataStructures.Array.Structures.Data;
+import Matrices.Matrices.Matrix;
 import Trees.RedBlackTrees.RedBlackNode;
 import Trees.RedBlackTrees.RedBlackTree;
 import lists.LinkedListCharacters.Structures.LinkedListCharacters;
@@ -11,6 +12,7 @@ import references.references.NumberReference;
 import references.references.StringReference;
 
 import static DataStructures.Array.Structures.Structures.*;
+import static Matrices.Matrices.Matrices.*;
 import static QuickSort.QuickSort.QuickSort.QuickSortNumbers;
 import static Trees.RedBlackTrees.RedBlackTrees.*;
 import static aarrays.arrays.arrays.aCopyString;
@@ -19,7 +21,6 @@ import static charCharacters.Characters.Characters.charDecimalDigitToCharacter;
 import static java.lang.Math.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
-import static math.math.math.GreatestCommonDivisor;
 import static math.math.math.IsInteger;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
 import static numbers.StringToNumber.StringToNumber.*;
@@ -50,8 +51,8 @@ public class AdventOfCode {
         QuickSortNumbers(left);
         QuickSortNumbers(right);
 
-        sum = 0;
-        for(i = 0; i < n; i = i + 1d){
+        sum = 0d;
+        for(i = 0d; i < n; i = i + 1d){
             sum = sum + abs(right[(int)i] - left[(int)i]);
         }
 
@@ -84,10 +85,10 @@ public class AdventOfCode {
         QuickSortNumbers(left);
         QuickSortNumbers(right);
 
-        sum = 0;
-        for(i = 0; i < lines.length; i = i + 1d){
+        sum = 0d;
+        for(i = 0d; i < lines.length; i = i + 1d){
             n = left[(int)i];
-            c = 0;
+            c = 0d;
 
             for(j = 0; j < lines.length; j = j + 1d){
                 m = right[(int)j];
@@ -555,7 +556,7 @@ public class AdventOfCode {
 
     public static char[] ComputeDay5Part1(char[] input) {
         char [] output;
-        double n, i, j, o, p;
+        double n, i, j;
         LinkedListStrings ordersLL, listsLL;
         char[] line;
         boolean doingOrders;
@@ -2020,25 +2021,10 @@ public class AdventOfCode {
         public Coordinate c;
     }
 
-    /*
-       x*a + y*b = m   :a = ax, b = bx, m = cx
-       x*c + y*d = n   :c = ay, d = by, n = cy
-
-       x*a = m - y*b
-       x = (m - y*b)/a               (1)
-
-       c*(m - y*b)/a + y*d = n
-       c*(m - y*b) + y*d*a = n*a
-       c*m - c*y*b + y*d*a = n*a
-       c*m + y*d*a - c*y*b = n*a
-       c*m + y*(d*a - c*b) = n*a
-       y*(d*a - c*b) = n*a - c*m
-       y = (n*a - c*m)/(d*a - c*b)   (2)
-    */
-
     public static double FindPuzzleSolutions(Puzzle p) {
         double cost, x, y;
         Coordinate a, b, c;
+        Matrix M, X, P, R;
 
         cost = 0d;
 
@@ -2046,14 +2032,241 @@ public class AdventOfCode {
         b = p.b;
         c = p.c;
 
-        y = (c.y * a.x - a.y * c.x) / (b.y * a.x - a.y * b.x);
-        x = (c.x - y*b.x)/a.x;
+        M = CreateSquareMatrix(2d);
+        SetMatrixElement(M, 0d, 0d, a.x);
+        SetMatrixElement(M, 1d, 0d, a.y);
+        SetMatrixElement(M, 0d, 1d, b.x);
+        SetMatrixElement(M, 1d, 1d, b.y);
 
-        if(IsInteger(x) && IsInteger(y)){
-            cost = x * 3d + y;
+        X = CreateSquareMatrix(2d);
+        Inverse(M, X);
+        R = CreateMatrix(2d, 1d);
+        P = CreateMatrix(2d, 1d);
+
+        SetMatrixElement(P, 0d, 0d, c.x);
+        SetMatrixElement(P, 1d, 0d, c.y);
+
+        Multiply(R, X, P);
+
+        x = Element(R, 0d, 0d);
+        y = Element(R, 1d, 0d);
+
+        x = round(x);
+        y = round(y);
+
+        if(a.x * x + b.x * y == c.x){
+            if(a.y * x + b.y * y == c.y) {
+                cost = x * 3d + y;
+            }
         }
 
         return cost;
+    }
+
+    public static void SetMatrixElement(Matrix M, double m, double n, double val){
+        M.r[(int)(m)].c[(int)(n)] = val;
+    }
+
+    public static char[] ComputeDay14Part1(char[] input, double tw, double th) {
+        char [] output, line;
+        double n, i;
+        StringReference [] lines;
+        Robot [] robots;
+        Robot robot, r;
+        double q1, q2, q3, q4;
+        double [] rs;
+
+        // Read numbers into array
+        lines = SplitByCharacter(input, '\n');
+
+        // Read robot specs
+        robots = new Robot[lines.length];
+        for(i = 0; i < lines.length; i = i + 1d){
+            line = lines[(int)i].string;
+            line = ReplaceString(line, "p=".toCharArray(), "".toCharArray());
+            line = ReplaceString(line, "v=".toCharArray(), "".toCharArray());
+            ReplaceCharacter(line, ' ', ',');
+            rs = StringToNumberArray(line);
+
+            r = new Robot();
+            r.x = rs[0];
+            r.y = rs[1];
+            r.dx = rs[2];
+            r.dy = rs[3];
+            robots[(int)i] = r;
+        }
+
+        // Simulate
+        for(i = 0d; i < 100d; i = i + 1d) {
+            RunSimulation(robots, tw, th);
+        }
+
+        // Compute robots per quadrant
+        q1 = 0d;
+        q2 = 0d;
+        q3 = 0d;
+        q4 = 0d;
+        for(i = 0; i < robots.length; i = i + 1d) {
+            robot = robots[(int) i];
+
+            // top, left
+            if(robot.x < floor(tw / 2d) && robot.y < floor(th / 2d)){
+                q1 = q1 + 1d;
+            }
+
+            // top, right
+            if(robot.x > floor(tw / 2d) && robot.y < floor(th / 2d)){
+                q2 = q2 + 1d;
+            }
+
+            // bottom, left
+            if(robot.x < floor(tw / 2d) && robot.y > floor(th / 2d)){
+                q3 = q3 + 1d;
+            }
+
+            // bottom, right
+            if(robot.x > floor(tw / 2d) && robot.y > floor(th / 2d)){
+                q4 = q4 + 1d;
+            }
+        }
+
+        n = q1 * q2 * q3 * q4;
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
+    }
+
+    public static void RunSimulation(Robot[] robots, double w, double h) {
+        double i;
+        Robot robot;
+
+        for(i = 0; i < robots.length; i = i + 1d){
+            robot = robots[(int)i];
+
+            robot.x = robot.x + robot.dx;
+            robot.y = robot.y + robot.dy;
+
+            if(robot.x < 0){
+                robot.x = w + robot.x;
+            }
+
+            if(robot.x >= w){
+                robot.x = robot.x - w;
+            }
+
+            if(robot.y < 0){
+                robot.y = h + robot.y;
+            }
+
+            if(robot.y >= h){
+                robot.y = robot.y - h;
+            }
+        }
+    }
+
+    public static void PrintRobots(Robot[] robots, double w, double h) {
+        double i, x, y, rf;
+        Robot robot;
+
+        for (y = 0; y < h; y = y + 1d) {
+            for (x = 0; x < w; x = x + 1d) {
+
+                rf = 0d;
+                for (i = 0; i < robots.length; i = i + 1d) {
+                    robot = robots[(int) i];
+
+                    if (robot.x == x && robot.y == y) {
+                        rf = rf + 1d;
+                    }
+                }
+
+                if (rf == 0) {
+                    System.out.print('.');
+                } else {
+                    System.out.print((long) rf);
+                }
+            }
+            System.out.print('\n');
+        }
+    }
+
+    static class Robot{
+        public double x;
+        public double y;
+        public double dx;
+        public double dy;
+    }
+
+    public static char[] ComputeDay14Part2(char[] input, double tw, double th) {
+        char [] output, line;
+        double n, i, j, x, y, rf, maxrf;
+        StringReference [] lines;
+        Robot [] robots;
+        Robot robot, r;
+        boolean found;
+        double [] rs;
+
+        // Read numbers into array
+        lines = SplitByCharacter(input, '\n');
+
+        // Read robot specs
+        robots = new Robot[lines.length];
+        for(i = 0; i < lines.length; i = i + 1d){
+            line = lines[(int)i].string;
+            line = ReplaceString(line, "p=".toCharArray(), "".toCharArray());
+            line = ReplaceString(line, "v=".toCharArray(), "".toCharArray());
+            ReplaceCharacter(line, ' ', ',');
+            rs = StringToNumberArray(line);
+
+            r = new Robot();
+            r.x = rs[0];
+            r.y = rs[1];
+            r.dx = rs[2];
+            r.dy = rs[3];
+            robots[(int)i] = r;
+        }
+
+        // Simulate
+        found = false;
+        for(i = 0; i < 28000d && !found; i = i + 1d) {
+            RunSimulation(robots, tw, th);
+
+            // This if is to make the program run quicker for normal testing.
+            if(i > 7000d) {
+
+                // Count robots in each spot
+                maxrf = 0d;
+                for (y = 0d; y < th; y = y + 1d) {
+                    for (x = 0d; x < tw; x = x + 1d) {
+
+                        rf = 0d;
+                        for (j = 0; j < robots.length; j = j + 1d) {
+                            robot = robots[(int) j];
+
+                            if (robot.x == x && robot.y == y) {
+                                rf = rf + 1d;
+                            }
+                        }
+
+                        maxrf = max(rf, maxrf);
+                    }
+                }
+
+                if (maxrf == 1) {
+                    found = true;
+                    //PrintRobots(robots, tw, th);
+                }
+            }
+        }
+
+        n = i;
+
+        // Done
+        output = CreateStringDecimalFromNumber(n);
+
+        return output;
     }
 }
 
