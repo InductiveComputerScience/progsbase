@@ -5,6 +5,7 @@ import lists.LinkedListStrings.Structures.LinkedListStrings;
 import references.references.NumberReference;
 import references.references.StringReference;
 
+import static AdventOfCode.AdventOfCode.AdventOfCodeDay4.PrintField;
 import static AdventOfCode.AdventOfCode.AdventOfCodeLib.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
 import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
@@ -73,7 +74,7 @@ public class AdventOfCodeDay15 {
     }
 
     public static void Simulate(StringReference[] field, char op) {
-        double x, y, px, py, w, h, i, bc;
+        double x, y, px, py, w, h, i, bc, dx, dy;
         boolean found, done;
         char c;
 
@@ -96,105 +97,41 @@ public class AdventOfCodeDay15 {
         }
 
         // Move robot
+        dx = 0;
+        dy = 0;
         if(op == '^'){
-            if(GetCharacter(field, px, py - 1d) == '.'){
-                SetCharacter(field, px, py, '.');
-                SetCharacter(field, px, py - 1d, '@');
-            }
-
-            if(GetCharacter(field, px, py - 1d) == 'O'){
-                // find box chain length
-                bc = 0d;
-                done = false;
-                for(i = 1d; !done; i = i + 1d){
-                    if(GetCharacter(field, px, py - i) == 'O'){
-                        bc = bc + 1d;
-                    }else{
-                        done = true;
-                    }
-                }
-
-                // Move box chain
-                if(GetCharacter(field, px, py - bc - 1d) == '.'){
-                    SetCharacter(field, px, py - bc - 1d, 'O');
-                    SetCharacter(field, px, py - 1d, '@');
-                    SetCharacter(field, px, py, '.');
-                }
-            }
+            dy = -1;
         }else if(op == 'v'){
-            if(GetCharacter(field, px, py + 1d) == '.'){
-                SetCharacter(field, px, py, '.');
-                SetCharacter(field, px, py + 1d, '@');
-            }
-
-            if(GetCharacter(field, px, py + 1d) == 'O'){
-                // find box chain length
-                bc = 0d;
-                done = false;
-                for(i = 1d; !done; i = i + 1d){
-                    if(GetCharacter(field, px, py + i) == 'O'){
-                        bc = bc + 1d;
-                    }else{
-                        done = true;
-                    }
-                }
-
-                // Move box chain
-                if(GetCharacter(field, px, py + bc + 1d) == '.'){
-                    SetCharacter(field, px, py + bc + 1d, 'O');
-                    SetCharacter(field, px, py + 1d, '@');
-                    SetCharacter(field, px, py, '.');
-                }
-            }
+            dy = 1;
         }else if(op == '>'){
-            if(GetCharacter(field, px + 1d, py) == '.'){
-                SetCharacter(field, px, py, '.');
-                SetCharacter(field, px + 1d, py, '@');
-            }
-
-            if(GetCharacter(field, px + 1d, py) == 'O'){
-                // find box chain length
-                bc = 0d;
-                done = false;
-                for(i = 1d; !done; i = i + 1d){
-                    if(GetCharacter(field, px + i, py) == 'O'){
-                        bc = bc + 1d;
-                    }else{
-                        done = true;
-                    }
-                }
-
-                // Move box chain
-                if(GetCharacter(field, px + bc + 1d, py) == '.'){
-                    SetCharacter(field, px + bc + 1d, py, 'O');
-                    SetCharacter(field, px + 1d, py, '@');
-                    SetCharacter(field, px, py, '.');
-                }
-            }
+            dx = 1;
         }else if(op == '<'){
-            if(GetCharacter(field, px - 1d, py) == '.'){
-                SetCharacter(field, px, py, '.');
-                SetCharacter(field, px - 1d, py, '@');
+            dx = -1;
+        }
+
+        // Move
+        if(GetCharacter(field, px + dx, py + dy) == '.'){
+            SetCharacter(field, px, py, '.');
+            SetCharacter(field, px + dx, py + dy, '@');
+        }
+
+        if(GetCharacter(field, px + dx, py + dy) == 'O'){
+            // find box chain length
+            bc = 0d;
+            done = false;
+            for(i = 1d; !done; i = i + 1d){
+                if(GetCharacter(field, px + dx*i, py + dy*i) == 'O'){
+                    bc = bc + 1d;
+                }else{
+                    done = true;
+                }
             }
 
-            if(GetCharacter(field, px - 1d, py) == 'O'){
-                // find box chain length
-                bc = 0d;
-                done = false;
-                for(i = 1d; !done; i = i + 1d){
-                    if(GetCharacter(field, px - i, py) == 'O'){
-                        bc = bc + 1d;
-                    }else{
-                        done = true;
-                    }
-                }
-
-                // Move box chain
-                if(GetCharacter(field, px - bc - 1d, py) == '.'){
-                    SetCharacter(field, px - bc - 1d, py, 'O');
-                    SetCharacter(field, px - 1d, py, '@');
-                    SetCharacter(field, px, py, '.');
-                }
+            // Move box chain
+            if(GetCharacter(field, px + dx*(bc + 1d), py + dy*(bc + 1d)) == '.'){
+                SetCharacter(field, px + dx*(bc + 1d), py + dy*(bc + 1d), 'O');
+                SetCharacter(field, px, py, '.');
+                SetCharacter(field, px + dx, py + dy, '@');
             }
         }
 
