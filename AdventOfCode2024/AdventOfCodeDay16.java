@@ -1,31 +1,21 @@
 package AdventOfCode.AdventOfCode;
 
-import lists.LinkedListCharacters.Structures.LinkedListCharacters;
-import lists.LinkedListStrings.Structures.LinkedListStrings;
 import references.references.*;
 
-import static AdventOfCode.AdventOfCode.AdventOfCodeDay4.PrintField;
 import static AdventOfCode.AdventOfCode.AdventOfCodeLib.*;
-import static lists.LinkedListStrings.LinkedListStringsFunctions.LinkedListStringsFunctions.*;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
 import static references.references.references.*;
 import static strings.strings.strings.SplitByCharacter;
 
-
 public class AdventOfCodeDay16 {
     public static char[] ComputeDay16Part1(char[] input) {
-        char [] output, line, program;
-        double n, i, w, h, x, y;
+        char [] output;
+        double n, w, h, x, y;
         StringReference [] field;
         NumberArrayReference [] scores;
-        BooleanArrayReference [] determined, visited;
-        boolean done, found;
-        LinkedListStrings ll;
-        LinkedListCharacters lc;
+        BooleanArrayReference [] determined;
         char dir;
         Coordinate rd, end;
-
-        ll = CreateLinkedListString();
 
         // Read field
         field = SplitByCharacter(input, '\n');
@@ -64,18 +54,14 @@ public class AdventOfCodeDay16 {
         // Find end score
         n = GetNumber(scores, end.x, end.y);
 
-        // Print
-        /*for(y = 0d; y < h; y = y + 1d){
-            for(x = 0d; x < w; x = x + 1d){
-                System.out.printf("%5d ", (int)GetNumber(scores, x, y));
-            }
-            System.out.println();
-        }*/
-
         // Done
         output = CreateStringDecimalFromNumber(n);
 
         return output;
+    }
+
+    public static boolean Acceptable(StringReference[] field, double x, double y) {
+        return GetCharacter(field, x, y) == '.' || GetCharacter(field, x, y) == 'E';
     }
 
     public static void Dijkstras(StringReference[] field, NumberArrayReference[] scores, BooleanArrayReference[] determined, double x, double y, double score, char dir) {
@@ -98,7 +84,7 @@ public class AdventOfCodeDay16 {
 
         if(!done) {
             // Up
-            if (GetCharacter(field, x, y - 1d) == '.' || GetCharacter(field, x, y - 1d) == 'E') {
+            if (Acceptable(field, x, y - 1d)) {
                 skip = false;
                 if (dir == '^') {
                     newScore = score + 1d;
@@ -114,7 +100,7 @@ public class AdventOfCodeDay16 {
                 }
             }
             // Down
-            if (GetCharacter(field, x, y + 1d) == '.' || GetCharacter(field, x, y + 1d) == 'E') {
+            if (Acceptable(field, x, y + 1d)) {
                 skip = false;
                 if (dir == 'v') {
                     newScore = score + 1d;
@@ -130,7 +116,7 @@ public class AdventOfCodeDay16 {
                 }
             }
             // Left
-            if (GetCharacter(field, x - 1d, y) == '.' || GetCharacter(field, x - 1d, y) == 'E') {
+            if (Acceptable(field, x - 1d, y)) {
                 skip = false;
                 if (dir == '<') {
                     newScore = score + 1d;
@@ -146,7 +132,7 @@ public class AdventOfCodeDay16 {
                 }
             }
             // Right
-            if (GetCharacter(field, x + 1d, y) == '.' || GetCharacter(field, x + 1d, y) == 'E') {
+            if (Acceptable(field, x + 1d, y)) {
                 skip = false;
                 if (dir == '>') {
                     newScore = score + 1d;
@@ -167,7 +153,7 @@ public class AdventOfCodeDay16 {
     public static char[] ComputeDay16Part2(char[] input) {
         char [] output;
         double n, w, h, x, y;
-        StringReference [] field, markfield;
+        StringReference [] field, markField;
         NumberArrayReference [] scores;
         BooleanArrayReference [] determined;
         char dir;
@@ -208,28 +194,17 @@ public class AdventOfCodeDay16 {
         Dijkstras(field, scores, determined, rd.x, rd.y, 0d, dir);
 
         // Color best paths
-        markfield = CopyField(field);
-        ColorBest(markfield, field, scores, rd.x, rd.y);
-
-        PrintField(field);
-        PrintField(markfield);
+        markField = CopyField(field);
+        ColorBest(markField, field, scores, rd.x, rd.y);
 
         // Find end score
         n = 0d;
         for(y = 0d; y < h; y = y + 1d){
             for(x = 0d; x < w; x = x + 1d){
-                if(GetCharacter(markfield, x, y) == 'O'){
+                if(GetCharacter(markField, x, y) == 'O'){
                     n = n + 1d;
                 }
             }
-        }
-
-        // Print
-        for(y = 0d; y < h; y = y + 1d){
-            for(x = 0d; x < w; x = x + 1d){
-                System.out.printf("%6d ", (int)GetNumber(scores, x, y));
-            }
-            System.out.println();
         }
 
         // Done
@@ -239,46 +214,38 @@ public class AdventOfCodeDay16 {
     }
 
     public static boolean ColorBest(StringReference[] markfield, StringReference[] field, NumberArrayReference[] scores, final double x, final double y) {
-        double score;
-        boolean reachedTheEnd;
-        boolean best;
+        double score, offset;
+        boolean reachedTheEnd, best, pathReachedEnd;
 
         score = GetNumber(scores, x, y);
 
         reachedTheEnd = GetCharacter(field, x, y) == 'E';
 
-        //System.out.println("Searching " + score);
-
-        if(reachedTheEnd){
-            System.out.println("Reached end");
-        }
-
         // Up
         if (Acceptable(field, x, y - 1d)) {
             best = false;
-            double off = 0d;
+            offset = 1d;
 
             if (GetNumber(scores, x, y - 1d) == score + 1d) {
                 best = true;
-                off = 1;
             }else if (GetNumber(scores, x, y - 1d) == score + 1000d + 1d) {
                 best = true;
-                off = 1;
             }else if (GetNumber(scores, x, y - 2d) == score + 2d) {
                 if(
                     Acceptable(field, x + 1d, y - 1d) ||
                     Acceptable(field, x - 1d, y - 1d)
                 ){
                     best = true;
-                    off = 2;
+                    offset = 2d;
                 }
             }
 
             if(best) {
-                boolean X = ColorBest(markfield, field, scores, x, y - off);
-                reachedTheEnd = reachedTheEnd || X;
+                pathReachedEnd = ColorBest(markfield, field, scores, x, y - offset);
 
-                if(off == 2d && reachedTheEnd){
+                reachedTheEnd = reachedTheEnd || pathReachedEnd;
+
+                if(offset == 2d && reachedTheEnd){
                     SetCharacter(markfield, x, y - 1d, 'O');
                 }
             }
@@ -286,29 +253,28 @@ public class AdventOfCodeDay16 {
         // Down
         if (Acceptable(field, x, y + 1d)) {
             best = false;
-            double off = 0d;
+            offset = 1d;
 
             if (GetNumber(scores, x, y + 1d) == score + 1d) {
                 best = true;
-                off = 1d;
             }else if (GetNumber(scores, x, y + 1d) == score + 1000d + 1d) {
                 best = true;
-                off = 1d;
             }else if (GetNumber(scores, x, y + 2d) == score + 2d) {
                 if(
                     Acceptable(field, x + 1d, y + 1d) ||
                     Acceptable(field, x - 1d, y + 1d)
                 ){
                     best = true;
-                    off = 2;
+                    offset = 2d;
                 }
             }
 
             if(best) {
-                boolean X = ColorBest(markfield, field, scores, x, y + off);
-                reachedTheEnd = reachedTheEnd || X;
+                pathReachedEnd = ColorBest(markfield, field, scores, x, y + offset);
 
-                if(off == 2d && reachedTheEnd){
+                reachedTheEnd = reachedTheEnd || pathReachedEnd;
+
+                if(offset == 2d && reachedTheEnd){
                     SetCharacter(markfield, x, y + 1d, 'O');
                 }
             }
@@ -316,29 +282,28 @@ public class AdventOfCodeDay16 {
         // Left
         if (Acceptable(field, x - 1d, y)) {
             best = false;
-            double off = 0d;
+            offset = 1d;
 
             if (GetNumber(scores, x - 1d, y) == score + 1d) {
                 best = true;
-                off = 1d;
             }else if (GetNumber(scores, x - 1d, y) == score + 1000d + 1d) {
                 best = true;
-                off = 1d;
             }else if (GetNumber(scores, x - 2d, y) == score + 2d) {
                 if(
                     Acceptable(field, x - 1d, y - 1d) ||
                     Acceptable(field, x - 1d, y + 1d)
                 ){
                     best = true;
-                    off = 2;
+                    offset = 2d;
                 }
             }
 
             if(best) {
-                boolean X = ColorBest(markfield, field, scores, x - off, y);
-                reachedTheEnd = reachedTheEnd || X;
+                pathReachedEnd = ColorBest(markfield, field, scores, x - offset, y);
 
-                if(off == 2d && reachedTheEnd){
+                reachedTheEnd = reachedTheEnd || pathReachedEnd;
+
+                if(offset == 2d && reachedTheEnd){
                     SetCharacter(markfield, x - 1d, y, 'O');
                 }
             }
@@ -346,46 +311,38 @@ public class AdventOfCodeDay16 {
         // Right
         if (Acceptable(field, x + 1d, y)) {
             best = false;
-            double off = 0d;
+            offset = 1d;
 
             if (GetNumber(scores, x + 1d, y) == score + 1d) {
                 best = true;
-                off = 1d;
             }else if (GetNumber(scores, x + 1d, y) == score + 1000d + 1d) {
                 best = true;
-                off = 1d;
             }else if (GetNumber(scores, x + 2d, y) == score + 2d) {
                 if(
                     Acceptable(field, x + 1d, y - 1d) ||
                     Acceptable(field, x + 1d, y + 1d)
                 ){
                     best = true;
-                    off = 2;
+                    offset = 2d;
                 }
             }
 
             if(best) {
-                boolean X = ColorBest(markfield, field, scores, x + off, y);
-                reachedTheEnd = reachedTheEnd || X;
+                pathReachedEnd = ColorBest(markfield, field, scores, x + offset, y);
 
-                if(off == 2d && reachedTheEnd){
+                reachedTheEnd = reachedTheEnd || pathReachedEnd;
+
+                if(offset == 2d && reachedTheEnd){
                     SetCharacter(markfield, x + 1d, y, 'O');
                 }
             }
         }
 
-        //SetCharacter(markfield, x, y, 'O');
-
         if(reachedTheEnd){
             SetCharacter(markfield, x, y, 'O');
-            //PrintField(markfield);
         }
 
         return reachedTheEnd;
-    }
-
-    private static boolean Acceptable(StringReference[] field, double x, double y) {
-        return GetCharacter(field, x, y) == '.' || GetCharacter(field, x, y) == 'E';
     }
 
     // Lib
@@ -406,6 +363,7 @@ public class AdventOfCodeDay16 {
         field[(int)y].booleanArray[(int)x] = b;
     }
 }
+
 
 
 
