@@ -5,6 +5,7 @@ import lists.LinkedListNumbers.Structures.LinkedListNumbers;
 import references.references.NumberReference;
 import references.references.StringReference;
 
+import static Bits.Bitwise.Bitwise.XorBytes;
 import static aarrays.arrays.arrays.aCopyNumberArray;
 import static java.lang.Math.*;
 import static lists.LinkedListCharacters.LinkedListCharactersFunctions.LinkedListCharactersFunctions.*;
@@ -19,12 +20,13 @@ import static strings.strings.strings.SplitByString;
 
 public class AdventOfCodeDay17 {
     public static char[] ComputeDay17Part1(char[] input) {
-        char [] output;
+        char [] output, nstr;
         StringReference [] lines;
         double A, B, C, i;
-        double [] program;
+        double [] program, outputNumbers;
+        LinkedListCharacters ll;
 
-        // Read field
+        // Read state and program
         lines = SplitByCharacter(input, '\n');
 
         StringReference[] parts = SplitByString(lines[0].string, ": ".toCharArray());
@@ -39,29 +41,25 @@ public class AdventOfCodeDay17 {
         parts = SplitByString(lines[4].string, ": ".toCharArray());
         program = StringToNumberArray(parts[1].string);
 
+        // Run program
+        outputNumbers = RunProgram(A, B, C, program);
 
-        //System.out.println("A: " + A + ", B: " + B + ", C: " + C);
-        //System.out.println(Arrays.toString(program));
-
-        double [] outputNumbers = RunProgram(A, B, C, program);
-
-        LinkedListCharacters ll = CreateLinkedListCharacter();
-
+        // Produce output
+        ll = CreateLinkedListCharacter();
         for(i = 0d; i < outputNumbers.length; i = i + 1d){
-            char [] nstr = CreateStringDecimalFromNumber(outputNumbers[(int)i]);
+            nstr = CreateStringDecimalFromNumber(outputNumbers[(int)i]);
             LinkedListCharactersAddString(ll, nstr);
             if(i + 1d != outputNumbers.length){
                 LinkedListAddCharacter(ll, ',');
             }
         }
-
         output = LinkedListCharactersToArray(ll);
 
         return output;
     }
 
     public static double [] RunProgram(double rA, double rB, double rC, double[] program) {
-        double ip, opcode, operand, a, b, x, i;
+        double ip, opcode, operand, a, b, x;
         LinkedListNumbers output;
         boolean done;
 
@@ -70,7 +68,7 @@ public class AdventOfCodeDay17 {
         ip = 0d;
 
         done = false;
-        for(i = 0d; !done; i = i + 1d){
+        for(; !done; ){
             if(ip >= program.length){
                 done = true;
             }
@@ -79,7 +77,8 @@ public class AdventOfCodeDay17 {
                 opcode = program[(int) ip];
                 operand = program[(int) (ip + 1d)];
 
-                if (opcode == 0d) { // adv
+                if (opcode == 0d) {
+                    // adv
                     a = rA;
                     b = GetCombo(rA, rB, rC, operand);
 
@@ -89,12 +88,12 @@ public class AdventOfCodeDay17 {
                     rA = x;
 
                     ip = ip + 2d;
-                }else if (opcode == 1d) { // bxl
+                }else if (opcode == 1d) {
+                    // bxl
                     a = rB;
                     b = operand;
 
-                    //x = Xor4Byte(a, b);
-                    x = (long)a ^ (long)b;
+                    x = XorBytes(a, b, 6d);
 
                     x = Truncate(x);
                     rB = x;
@@ -103,14 +102,14 @@ public class AdventOfCodeDay17 {
                 }else if (opcode == 2d) { // bst
                     a = GetCombo(rA, rB, rC, operand);
 
-                    //x = a % 8d;
-                    x = (long)a & 7;
+                    x = a % 8d;
 
                     x = Truncate(x);
                     rB = x;
 
                     ip = ip + 2d;
-                }else if (opcode == 3d) { // jnz
+                }else if (opcode == 3d) {
+                    // jnz
                     if (rA == 0d) {
                         // Do nothing.
                         ip = ip + 2d;
@@ -119,43 +118,43 @@ public class AdventOfCodeDay17 {
 
                         ip = a;
                     }
-                }else if (opcode == 4d) { // bxc
+                }else if (opcode == 4d) {
+                    // bxc
                     a = rB;
                     b = rC;
 
-                    //x = Xor4Byte(a, b);
-                    x = (long)a ^ (long)b;
+                    x = XorBytes(a, b, 6d);
 
                     x = Truncate(x);
                     rB = x;
 
                     ip = ip + 2d;
-                }else if (opcode == 5d) { // out
+                }else if (opcode == 5d) {
+                    // out
                     a = GetCombo(rA, rB, rC, operand);
 
-                    //x = a % 8d;
-                    x = (long)a & 7;
+                    x = a % 8d;
 
                     LinkedListAddNumber(output, x);
 
                     ip = ip + 2d;
-                }else if (opcode == 6d) { // bdv
+                }else if (opcode == 6d) {
+                    // bdv
                     a = rA;
                     b = GetCombo(rA, rB, rC, operand);
 
-                    //x = a / pow(2d, b);
-                    x = (long)a >> (long)b;
+                    x = a / pow(2d, b);
 
                     x = Truncate(x);
                     rB = x;
 
                     ip = ip + 2d;
-                }else if (opcode == 7d) { // cdv
+                }else if (opcode == 7d) {
+                    // cdv
                     a = rA;
                     b = GetCombo(rA, rB, rC, operand);
 
-                    //x = a / pow(2d, b);
-                    x = (long)a >> (long)b;
+                    x = a / pow(2d, b);
 
                     x = Truncate(x);
                     rC = x;
@@ -186,6 +185,19 @@ public class AdventOfCodeDay17 {
         return r;
     }
 
+    /*
+        Program disassembly:
+
+        2,4      bst A         B = A % 8
+        1,1      bxl 1         B = B ^ 1
+        7,5      cdv B         C = A >> B
+        4,4      bxc           B = B ^ C
+        1,4      bxl 4         B = B ^ 4
+        0,3      adv 3         A = A >> 3
+        5,5      out B         output B % 8
+        3,0      jnz 0         jump to 0 if A is not 0
+    */
+
     public static char[] ComputeDay17Part2(char[] input) {
         char [] output;
         StringReference [] lines, parts;
@@ -193,7 +205,7 @@ public class AdventOfCodeDay17 {
         double [] program, blocks;
         NumberReference aRef;
 
-        // Read field
+        // Read state and program
         lines = SplitByCharacter(input, '\n');
 
         parts = SplitByString(lines[1].string, ": ".toCharArray());
@@ -205,27 +217,29 @@ public class AdventOfCodeDay17 {
         parts = SplitByString(lines[4].string, ": ".toCharArray());
         program = StringToNumberArray(parts[1].string);
 
+        // Find Quine
         blocks = CreateNumberArrayReferenceLengthValue(program.length, 0d).numberArray;
         aRef = new NumberReference();
-        CheckA(B, C, program, blocks.length - 1d, blocks, aRef);
+        FindQuine(B, C, program, blocks.length - 1d, blocks, aRef);
 
+        // Output Result
         output = CreateStringDecimalFromNumber(aRef.numberValue);
 
         return output;
     }
 
-    public static boolean CheckA(double B, double C, double [] program, double p, double[] blocks_, NumberReference aRef){
+    public static boolean FindQuine(double B, double C, double [] program, double p, double[] blocksInput, NumberReference aRef){
         boolean done, matchDone;
         double [] outputNumbers, blocks;
         double i, j, match, A;
 
-        blocks = aCopyNumberArray(blocks_);
+        blocks = aCopyNumberArray(blocksInput);
 
         done = false;
-        for(i = 0d; i <= 8 && !done; i = i + 1d) {
+        for(i = 0d; i < 8 && !done; i = i + 1d) {
             blocks[(int)p] = i;
 
-            A = MakeA(blocks);
+            A = MakeAFromComponents(blocks);
 
             outputNumbers = RunProgram(A, B, C, program);
 
@@ -248,7 +262,7 @@ public class AdventOfCodeDay17 {
 
                 if(!done) {
                     if (match >= blocks.length - p) {
-                        done = CheckA(B, C, program, p - 1d, blocks, aRef);
+                        done = FindQuine(B, C, program, p - 1d, blocks, aRef);
                     }
                 }
             }
@@ -257,7 +271,7 @@ public class AdventOfCodeDay17 {
         return done;
     }
 
-    public static double MakeA(double[] blocks) {
+    public static double MakeAFromComponents(double [] blocks) {
         double i, A;
 
         A = 0d;
@@ -269,33 +283,3 @@ public class AdventOfCodeDay17 {
         return A;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
