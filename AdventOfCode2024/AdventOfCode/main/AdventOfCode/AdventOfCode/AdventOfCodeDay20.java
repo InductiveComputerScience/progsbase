@@ -6,7 +6,6 @@ import references.references.StringReference;
 
 import static aarrays.arrays.arrays.aCopyString;
 import static java.lang.Math.abs;
-import static java.lang.Math.min;
 import static numbers.NumberToString.NumberToString.CreateStringDecimalFromNumber;
 import static references.references.references.*;
 import static references.references.references.CreateBooleanArrayReferenceLengthValue;
@@ -15,7 +14,7 @@ import static strings.strings.strings.*;
 public class AdventOfCodeDay20 {
     public static char[] ComputeDay20Part1(char[] input, double limit) {
         StringReference [] field;
-        double j, n, x, y, w, h, distCheat, distNoCheat;
+        double n, x, y, w, h, distCheat, distNoCheat;
         char [] output;
         Coordinate start, end;
         NumberArrayReference [] distances;
@@ -52,7 +51,6 @@ public class AdventOfCodeDay20 {
         RecurseFindShortest(field, distances, set, start.x, start.y, 0);
 
         distNoCheat = GetNumber(distances, end.x, end.y);
-        //System.out.println(distNoCheat);
 
         // Find cheats that save time
         n = 0d;
@@ -68,7 +66,6 @@ public class AdventOfCodeDay20 {
                     RecurseFindShortest(field, distances, set, start.x, start.y, 0);
 
                     distCheat = GetNumber(distances, end.x, end.y);
-                    //System.out.println(distCheat + ": " + (distNoCheat - distCheat));
 
                     if(distNoCheat - distCheat >= limit){
                         n = n + 1d;
@@ -204,7 +201,7 @@ public class AdventOfCodeDay20 {
 
     public static char[] ComputeDay20Part2(char[] input, double limit, double mc) {
         StringReference [] field;
-        double i, j, n, x, y, xi, yi, w, h, distCheat, distNoCheat, p;
+        double i, n, x, y, xi, yi, w, h, distCheat, distNoCheat, p;
         char [] output;
         Coordinate start, end;
         Warp [] warpsTo;
@@ -236,24 +233,19 @@ public class AdventOfCodeDay20 {
             }
         }
 
-        //PrintField(field);
-
         // Find length from start to end
         distances = InitDistances(w, h);
         set = InitSet(w, h);
         RecurseFindShortest(field, distances, set, start.x, start.y, 0);
 
         distNoCheat = GetNumber(distances, end.x, end.y);
-        //System.out.println(distNoCheat);
 
         // Find cheats that save time
         n = 0d;
         for(y = 0; y < h; y = y + 1d) {
             for (x = 0; x < w; x = x + 1d) {
-                //System.out.println(x + ", " + y + " = " + n);
 
                 if(GetCharacterWithBoundsCheck(field, x, y) == '.'){
-                    //SetCharacter(clearField, x, y, '.');
 
                     // Find warps
                     warpsTo = new Warp[(int)(w*h*20d)];
@@ -286,26 +278,10 @@ public class AdventOfCodeDay20 {
                         RecurseFindShortestLongCheat(field, x, y, warp, distances, set, start.x, start.y, 0);
 
                         distCheat = GetNumber(distances, end.x, end.y);
-                        //System.out.println(distCheat + ": " + (distNoCheat - distCheat));
-
-                        //limit = 72;
 
                         if (distNoCheat - distCheat >= limit) {
                             n = n + 1d;
                         }
-
-                        //if(x == start.x && y == start.y) {
-                        //if (distNoCheat - distCheat == 76) {
-                        //if(abs(warp.x - x) > 1 || abs(warp.y - y) > 1){
-                        /*if (distNoCheat - distCheat >= limit) {
-                            System.out.println("No cheat: " + distNoCheat);
-                            System.out.println("Cheat: "+ distCheat + ", save " + (distNoCheat - distCheat));
-                            SetCharacter(field, x, y, '*');
-                            SetCharacter(field, warp.x, warp.y, '~');
-                            PrintField(field);
-                            SetCharacter(field, x, y, '.');
-                            SetCharacter(field, warp.x, warp.y, '.');
-                        }*/
                     }
                 }
             }
@@ -336,62 +312,6 @@ public class AdventOfCodeDay20 {
             distances[(int)j] = CreateNumberArrayReferenceLengthValue(w, 0);
         }
         return distances;
-    }
-
-    public static StringReference[] InvertField(StringReference[] a) {
-        StringReference [] b;
-        double i, j;
-        char c;
-
-        b = new StringReference[a.length];
-        for(i = 0d; i < a.length; i = i + 1d){
-            b[(int)i] = new StringReference();
-            b[(int)i].string = aCopyString(a[(int)i].string);
-
-            for(j = 0d; j < b[(int)i].string.length; j = j + 1d){
-                c = b[(int)i].string[(int)j];
-                if(c == '#'){
-                    c = '.';
-                }else if(c == '.'){
-                    c = '#';
-                }
-                b[(int)i].string[(int)j] = c;
-            }
-        }
-
-        return b;
-    }
-
-    public static StringReference[] CopyField(StringReference[] a) {
-        StringReference [] b;
-        double i;
-
-        b = new StringReference[a.length];
-        for(i = 0d; i < a.length; i = i + 1d){
-            b[(int)i] = new StringReference();
-            b[(int)i].string = aCopyString(a[(int)i].string);
-        }
-
-        return b;
-    }
-
-    public static void PrintField(StringReference[] field) {
-        double y, x, w, h;
-
-        w = GetFieldWidth(field);
-        h = GetFieldHeight(field);
-
-        for(y = 0; y < h; y++){
-            for(x = 0; x < w; x++){
-                System.out.print(GetCharacter(field, x, y));
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-    public static char GetCharacter(StringReference[] field, double x, double y) {
-        return field[(int)y].string[(int)x];
     }
 
     public static void RecurseFindShortestLongCheat(StringReference[] field, double wx, double wy, Warp w, NumberArrayReference[] distances, BooleanArrayReference[] set, double x, double y, double l) {
