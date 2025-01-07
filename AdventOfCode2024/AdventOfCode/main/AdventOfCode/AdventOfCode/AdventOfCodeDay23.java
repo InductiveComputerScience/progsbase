@@ -2,7 +2,6 @@ package AdventOfCode.AdventOfCode;
 
 import DataStructures.Array.Structures.Array;
 import DataStructures.Array.Structures.Data;
-import QuickSort.QuickSortStrings.QuickSortStrings;
 import Trees.RedBlackTrees.RedBlackNode;
 import Trees.RedBlackTrees.RedBlackTree;
 import references.references.BooleanReference;
@@ -100,17 +99,10 @@ public class AdventOfCodeDay23 {
             for(c = 0d; c < ArrayLength(cons); c = c + 1) {
                 con = ArrayIndex(cons, c).string;
                 if (aStringsEqual(con, goal)) {
-                    str = "".toCharArray();
-
                     strArr = ToStaticStringArray(col.array);
                     xQuickSortStrings(strArr);
 
-                    for(i = 0; i < strArr.stringArray.length; i = i + 1d) {
-                        str = AppendString(str, strArr.stringArray[(int)i].string);
-                        if(i + i < ArrayLength(col.array)) {
-                            str = AppendCharacter(str, ',');
-                        }
-                    }
+                    str = ArrayToString(strArr);
 
                     AddToSet(triples, str);
                 }
@@ -125,6 +117,21 @@ public class AdventOfCodeDay23 {
                 }
             }
         }
+    }
+
+    public static char[] ArrayToString(StringArrayReference strArr) {
+        double i;
+        char [] str;
+
+        str = "".toCharArray();
+
+        for(i = 0; i < strArr.stringArray.length; i = i + 1d) {
+            str = AppendString(str, strArr.stringArray[(int)i].string);
+            if(i + 1 < strArr.stringArray.length) {
+                str = AppendCharacter(str, ',');
+            }
+        }
+        return str;
     }
 
     public static StringArrayReference ToStaticStringArray(Array array) {
@@ -143,85 +150,89 @@ public class AdventOfCodeDay23 {
     }
 
     public static char[] ComputeDay23Part2(char[] input) {
-        double i;
-        char [] output;
-        StringReference [] lines;
-        //RedBlackTree computersSet, links;
-        //Array computers, triples;
-        Map<String, List<String>> links;
-        Set<String> computers;
-        List<Set<Set<String>>> joined;
+        double i, j, count;
+        char [] output, c1, c2, com, con;
+        StringReference [] lines, cs;
+        RedBlackTree links;
+        StringSet computers, set, last;
+        boolean done;
+        Array array;
+        StringArrayReference arr;
+
+        List<StringSet> prev, next;
+        List<List<StringSet>> joined;
 
         joined = new ArrayList<>();
 
         // Read initial secrets
         lines = SplitByCharacter(input, '\n');
 
-        links = new HashMap<>();
-        computers = new HashSet<>();
+        links = CreateRedBlackTree();
+        computers = CreateStringSet();
 
         // Find computers and links
         for(i = 0; i < lines.length; i = i + 1d){
-            StringReference[] cs = SplitByCharacter(lines[(int) i].string, '-');
-            String c1 = new String(cs[0].string);
-            String c2 = new String(cs[1].string);
-            computers.add(c1);
-            computers.add(c2);
+            cs = SplitByCharacter(lines[(int) i].string, '-');
 
-            if(!links.containsKey(c1)){
-                links.put(c1, new ArrayList<>());
-            }
-            links.get(c1).add(c2);
+            c1 = cs[0].string;
+            c2 = cs[1].string;
 
-            if(!links.containsKey(c2)){
-                links.put(c2, new ArrayList<>());
+            AddToSet(computers, c1);
+            AddToSet(computers, c2);
+
+            if(!TreeHasKey(links, c1)){
+                InsertData(links, c1, CreateArrayData());
             }
-            links.get(c2).add(c1);
+            array = GetTreeData(links, c1).array;
+            AddStringToArray(array, c2);
+
+            if(!TreeHasKey(links, c2)){
+                InsertData(links, c2, CreateArrayData());
+            }
+            array = GetTreeData(links, c2).array;
+            AddStringToArray(array, c1);
         }
-
-        //System.out.println(computers);
-        //System.out.println(links);
-
-        // 0
-        joined.add(new HashSet<>());
-
-        // 1
-        joined.add(new HashSet<>());
 
         // 2
-        Set<Set<String>> twos = new HashSet<>();
-        for(Map.Entry<String, List<String>> x : links.entrySet()){
-            for(String con : x.getValue()){
-                Set<String> set = new HashSet<>();
-                set.add(x.getKey());
-                set.add(con);
-                twos.add(set);
+        prev = new ArrayList<>();
+        for(i = 0d; i < ArrayLength(computers.array); i = i + 1d){
+            com = ArrayIndex(computers.array, i).string;
+            array = GetTreeData(links, com).array;
+
+            for(j = 0d; j < ArrayLength(array); j = j + 1d){
+                con = ArrayIndex(array, j).string;
+                set = CreateStringSet();
+                AddToSet(set, com);
+                AddToSet(set, con);
+                prev.add(set);
             }
-            joined.add(twos);
+            joined.add(prev);
         }
 
-        Set<Set<String>> prev = twos;
-
-        boolean done = false;
+        done = false;
         for(;!done;) {
             // n + 1
-            Set<Set<String>> next = new HashSet<>();
-            for (Set<String> group : prev) {
+            next = new ArrayList<>();
+            for (StringSet group : prev) {
                 // Find all computers linked to all
-                for (String com : computers) {
-                    int count = 0;
-                    List<String> cons = links.get(com);
-                    for (String con : cons) {
-                        if (group.contains(con)) {
-                            count = count + 1;
+                for(i = 0d; i < ArrayLength(computers.array); i = i + 1d){
+                    com = ArrayIndex(computers.array, i).string;
+
+                    count = 0d;
+                    array = GetTreeData(links, com).array;
+
+                    for(j = 0d; j < ArrayLength(array); j = j + 1d){
+                        con = ArrayIndex(array, j).string;
+                        if (SetContains(group, con)) {
+                            count = count + 1d;
                         }
                     }
 
                     // Check if linked to the same as the group size, if so, add
-                    if (count == group.size()) {
-                        Set<String> set = new HashSet<>();
-                        set.addAll(group);
-                        set.add(com);
+                    if (count == ArrayLength(group.array)) {
+                        set = CreateStringSet();
+                        AddAllToSet(set, group);
+                        AddToSet(set, com);
                         next.add(set);
                     }
                 }
@@ -234,26 +245,21 @@ public class AdventOfCodeDay23 {
             }
         }
 
-        //System.out.println(joined);
+        last = joined.get(joined.size() - 1).get(0);
 
-        Set<String> last = joined.get(joined.size() - 1).stream().toList().get(0);
+        arr = CreateStringArrayReferenceLengthValue(ArrayLength(last.array), "".toCharArray());
 
-        List<String> code = new ArrayList<>();
-        code.addAll(last);
-        code.sort(String::compareTo);
 
-        StringBuilder sb = new StringBuilder();
-        for(i = 0; i < code.size(); i++){
-            sb.append(code.get((int)i));
-            if(i + 1 < code.size()){
-                sb.append(",");
-            }
+        for(i = 0d; i < ArrayLength(last.array); i = i + 1d){
+            arr.stringArray[(int)i].string = ArrayIndex(last.array, i).string;
         }
-        System.out.println(sb);
 
+        xQuickSortStrings(arr);
 
         // Produce output
-        output = sb.toString().toCharArray();
+        output = ArrayToString(arr);
+
+        System.out.println(output);
 
         return output;
     }
@@ -271,6 +277,16 @@ public class AdventOfCodeDay23 {
         set.array = CreateArray();
 
         return set;
+    }
+
+    public static void AddAllToSet(StringSet set, StringSet group) {
+        double i;
+        char[] str;
+
+        for(i = 0d; i < ArrayLength(group.array); i = i + 1d){
+            str = ArrayIndex(group.array, i).string;
+            AddToSet(set, str);
+        }
     }
 
     public static void AddToSet(StringSet set, char [] str){
