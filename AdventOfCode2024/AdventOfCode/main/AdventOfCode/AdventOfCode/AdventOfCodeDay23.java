@@ -8,8 +8,6 @@ import references.references.BooleanReference;
 import references.references.StringArrayReference;
 import references.references.StringReference;
 
-import java.util.*;
-
 import static DataStructures.Array.Arrays.Arrays.*;
 import static DataStructures.Array.Structures.Structures.*;
 import static QuickSort.QuickSortStrings.QuickSortStrings.xQuickSortStrings;
@@ -99,10 +97,17 @@ public class AdventOfCodeDay23 {
             for(c = 0d; c < ArrayLength(cons); c = c + 1) {
                 con = ArrayIndex(cons, c).string;
                 if (aStringsEqual(con, goal)) {
+                    str = "".toCharArray();
+
                     strArr = ToStaticStringArray(col.array);
                     xQuickSortStrings(strArr);
 
-                    str = ArrayToString(strArr);
+                    for(i = 0; i < strArr.stringArray.length; i = i + 1d) {
+                        str = AppendString(str, strArr.stringArray[(int)i].string);
+                        if(i + i < ArrayLength(col.array)) {
+                            str = AppendCharacter(str, ',');
+                        }
+                    }
 
                     AddToSet(triples, str);
                 }
@@ -117,21 +122,6 @@ public class AdventOfCodeDay23 {
                 }
             }
         }
-    }
-
-    public static char[] ArrayToString(StringArrayReference strArr) {
-        double i;
-        char [] str;
-
-        str = "".toCharArray();
-
-        for(i = 0; i < strArr.stringArray.length; i = i + 1d) {
-            str = AppendString(str, strArr.stringArray[(int)i].string);
-            if(i + 1 < strArr.stringArray.length) {
-                str = AppendCharacter(str, ',');
-            }
-        }
-        return str;
     }
 
     public static StringArrayReference ToStaticStringArray(Array array) {
@@ -150,25 +140,23 @@ public class AdventOfCodeDay23 {
     }
 
     public static char[] ComputeDay23Part2(char[] input) {
-        double i, j, count;
-        char [] output, c1, c2, com, con;
+        double i, j, k, count, prevLen, nextLen;
+        boolean done;
+        char [] output, c1, c2, con, com, str;
         StringReference [] lines, cs;
         RedBlackTree links;
-        StringSet computers, set, last;
-        boolean done;
+        StringSet computers;
         Array array;
+        StringSet ai, last, set, group;
+        StringSet [] prev, next;
         StringArrayReference arr;
-
-        List<StringSet> prev, next;
-        List<List<StringSet>> joined;
-
-        joined = new ArrayList<>();
 
         // Read initial secrets
         lines = SplitByCharacter(input, '\n');
 
         links = CreateRedBlackTree();
         computers = CreateStringSet();
+        ai = CreateStringSet();
 
         // Find computers and links
         for(i = 0; i < lines.length; i = i + 1d){
@@ -194,7 +182,8 @@ public class AdventOfCodeDay23 {
         }
 
         // 2
-        prev = new ArrayList<>();
+        prev = new StringSet[100000];
+        prevLen = 0;
         for(i = 0d; i < ArrayLength(computers.array); i = i + 1d){
             com = ArrayIndex(computers.array, i).string;
             array = GetTreeData(links, com).array;
@@ -204,20 +193,24 @@ public class AdventOfCodeDay23 {
                 set = CreateStringSet();
                 AddToSet(set, com);
                 AddToSet(set, con);
-                prev.add(set);
+                prev[(int)prevLen] = set;
+                prevLen = prevLen + 1d;
             }
-            joined.add(prev);
         }
 
         done = false;
+        //int n = 2;
         for(;!done;) {
             // n + 1
-            next = new ArrayList<>();
-            for (StringSet group : prev) {
+            //System.out.println(n+":" + prevLen);
+            //System.out.println(n++);
+            next = new StringSet[100000];
+            nextLen = 0d;
+            for (k = 0d; k < prevLen; k = k + 1d) {
+                group = prev[(int)k];
                 // Find all computers linked to all
-                for(i = 0d; i < ArrayLength(computers.array); i = i + 1d){
+                for (i = 0d; i < ArrayLength(computers.array); i = i + 1d) {
                     com = ArrayIndex(computers.array, i).string;
-
                     count = 0d;
                     array = GetTreeData(links, com).array;
 
@@ -229,39 +222,79 @@ public class AdventOfCodeDay23 {
                     }
 
                     // Check if linked to the same as the group size, if so, add
-                    if (count == ArrayLength(group.array)) {
+                    if (count == group.array.length) {
                         set = CreateStringSet();
                         AddAllToSet(set, group);
                         AddToSet(set, com);
-                        next.add(set);
+
+                        // Add if not already added
+                        str = ToSortedString(set);
+                        if(!SetContains(ai, str)){
+                            next[(int)nextLen] = set;
+                            nextLen = nextLen + 1d;
+                            AddToSet(ai, str);
+                        }
                     }
                 }
             }
-            if(next.size() > 0) {
-                joined.add(next);
+
+            if(nextLen > 0) {
                 prev = next;
+                prevLen = nextLen;
             }else{
                 done = true;
             }
         }
 
-        last = joined.get(joined.size() - 1).get(0);
+        // Produce output
+        last = prev[0];
 
-        arr = CreateStringArrayReferenceLengthValue(ArrayLength(last.array), "".toCharArray());
+        arr = CreateStringArrayReferenceLengthValue(last.array.length, "".toCharArray());
 
-
-        for(i = 0d; i < ArrayLength(last.array); i = i + 1d){
-            arr.stringArray[(int)i].string = ArrayIndex(last.array, i).string;
+        for(i = 0; i < last.array.length; i = i + 1d){
+            str = ArrayIndex(last.array, i).string;
+            arr.stringArray[(int)i].string = str;
         }
 
         xQuickSortStrings(arr);
 
-        // Produce output
         output = ArrayToString(arr);
 
-        System.out.println(output);
+        return output;
+    }
+
+    public static char[] ToSortedString(StringSet set) {
+        double i;
+        char [] str, output;
+        StringArrayReference arr;
+
+        arr = CreateStringArrayReferenceLengthValue(set.array.length, "".toCharArray());
+
+        for(i = 0; i < set.array.length; i = i + 1d){
+            str = ArrayIndex(set.array, i).string;
+            arr.stringArray[(int)i].string = str;
+        }
+
+        xQuickSortStrings(arr);
+
+        output = ArrayToString(arr);
 
         return output;
+    }
+
+    public static char[] ArrayToString(StringArrayReference strArr) {
+        double i;
+        char [] str;
+
+        str = "".toCharArray();
+
+        for(i = 0; i < strArr.stringArray.length; i = i + 1d) {
+            str = AppendString(str, strArr.stringArray[(int)i].string);
+            if(i + 1 < strArr.stringArray.length) {
+                str = AppendCharacter(str, ',');
+            }
+        }
+        return str;
     }
 
     public static class StringSet{
@@ -279,16 +312,6 @@ public class AdventOfCodeDay23 {
         return set;
     }
 
-    public static void AddAllToSet(StringSet set, StringSet group) {
-        double i;
-        char[] str;
-
-        for(i = 0d; i < ArrayLength(group.array); i = i + 1d){
-            str = ArrayIndex(group.array, i).string;
-            AddToSet(set, str);
-        }
-    }
-
     public static void AddToSet(StringSet set, char [] str){
         BooleanReference foundRef;
         double p;
@@ -301,6 +324,16 @@ public class AdventOfCodeDay23 {
             AddStringToArray(set.array, str);
             p = ArrayLength(set.array) - 1d;
             InsertData(set.rbtree, str, CreateNumberData(p));
+        }
+    }
+
+    public static void AddAllToSet(StringSet set, StringSet group) {
+        double i;
+        char[] str;
+
+        for(i = 0d; i < ArrayLength(group.array); i = i + 1d){
+            str = ArrayIndex(group.array, i).string;
+            AddToSet(set, str);
         }
     }
 
@@ -351,29 +384,3 @@ public class AdventOfCodeDay23 {
         return node.value;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
