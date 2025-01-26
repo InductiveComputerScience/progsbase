@@ -3,15 +3,15 @@ package AdventOfCode.AdventOfCode;
 import DataStructures.Array.RedBlackTrees.RedBlackNodeReference;
 import DataStructures.Array.Set.Set;
 import DataStructures.Array.Set.SetIterator;
+import DataStructures.Array.Set.SetReference;
 import DataStructures.Array.Structures.DataReference;
+import DataStructures.Array.Structures.StructIterator;
 import DataStructures.Array.Structures.Structure;
 import DataStructures.Array.Structures.Array;
 import references.references.StringArrayReference;
 import references.references.StringReference;
 
 import static DataStructures.Array.Arrays.Arrays.*;
-import static DataStructures.Array.RedBlackTrees.RedBlackTrees.GetNextData;
-import static DataStructures.Array.RedBlackTrees.RedBlackTrees.InitIterator;
 import static DataStructures.Array.Set.Sets.*;
 import static DataStructures.Array.Structures.Structures.*;
 import static QuickSort.QuickSortStrings.QuickSortStrings.xQuickSortStrings;
@@ -22,15 +22,15 @@ import static strings.strings.strings.*;
 
 public class AdventOfCodeDay23 {
     public static char[] ComputeDay23Part1(char[] input) {
+        boolean found;
         double n, i;
-        char [] output;
-        StringReference [] lines;
+        char [] output, c1, c2;
+        StringReference [] lines, cs;
         Structure links;
         Set computers, triples, col, filtered;
-        StringReference [] cs;
-        char [] c1, c2;
-        SetIterator it, it2;
-        DataReference com, triple;
+        SetIterator it, tripleIterator;
+        SetReference triple;
+        StringReference computer;
 
         // Read initial secrets
         lines = SplitByCharacter(input, '\n');
@@ -43,6 +43,7 @@ public class AdventOfCodeDay23 {
             cs = SplitByCharacter(lines[(int) i].string, '-');
             c1 = cs[0].string;
             c2 = cs[1].string;
+
             AddStringToSet(computers, c1);
             AddStringToSet(computers, c2);
 
@@ -61,29 +62,29 @@ public class AdventOfCodeDay23 {
         triples = CreateSet();
         col = CreateSet();
         it = new SetIterator();
-        com = new DataReference();
-        InitSetIterator(computers, it);
-        for(;SetIterate(it, com);){
-            AddStringToSet(col, com.data.string);
-            FindLinks(triples, links, com.data.string, com.data.string, col, 0);
-            RemoveStringFromSet(col, com.data.string);
+        computer = new StringReference();
+
+        for(InitSetIterator(computers, it); SetIterateStrings(it, computer);){
+            AddStringToSet(col, computer.string);
+            FindLinks(triples, links, computer.string, computer.string, col, 0);
+            RemoveStringFromSet(col, computer.string);
         }
 
         // Filter those with a t-computer
         filtered = CreateSet();
-        triple = new DataReference();
-        it2 = new SetIterator();
-        InitSetIterator(triples, it);
-        for(;SetIterate(it, triple);){
-            InitSetIterator(triple.data.set, it2);
-            boolean found = false;
-            for(;SetIterate(it2, com);) {
-                if (StartsWith(com.data.string, "t".toCharArray())) {
+        triple = new SetReference();
+        tripleIterator = new SetIterator();
+
+        for(InitSetIterator(triples, it); SetIterateSets(it, triple);){
+            found = false;
+            for(InitSetIterator(triple.set, tripleIterator); SetIterateStrings(tripleIterator, computer);) {
+                if (StartsWith(computer.string, "t".toCharArray())) {
                     found = true;
                 }
             }
+
             if(found){
-                AddSetToSet(filtered, triple.data.set);
+                AddSetToSet(filtered, triple.set);
             }
         }
 
@@ -114,7 +115,7 @@ public class AdventOfCodeDay23 {
         }else{
             for(i = 0d; i < ArrayLength(cons); i = i + 1d) {
                 con = ArrayIndexString(cons, i);
-                if(!SetContains(col, CreateStringData(con))) {
+                if(!SetContainsString(col, con)) {
                     AddStringToSet(col, con);
                     FindLinks(triples, links, con, goal, col, d + 1);
                     RemoveStringFromSet(col, con);
@@ -123,24 +124,26 @@ public class AdventOfCodeDay23 {
         }
     }
 
-    public static char[] ComputeDay23Part2(char[] input) {
+    public static char [] ComputeDay23Part2(char[] input) {
         double i, count;
         char [] output, c1, c2, con;
+        boolean done;
         StringReference [] lines, cs;
         Structure links;
         Set computers, set, next, prev;
-        RedBlackNodeReference nodeRef;
-        DataReference keyRef, valueRef, group, com, code;
+        StructIterator structIt;
+        DataReference valueRef;
+        StringReference computer, keyRef;
+        SetReference group, code;
         SetIterator it, it2;
-        boolean done;
         Array cons;
         StringArrayReference arr;
 
-        nodeRef = new RedBlackNodeReference();
-        keyRef = new DataReference();
+        structIt = new StructIterator();
+        keyRef = new StringReference();
         valueRef = new DataReference();
         it = new SetIterator();
-        com = new DataReference();
+        computer = new StringReference();
 
         // Read initial secrets
         lines = SplitByCharacter(input, '\n');
@@ -153,6 +156,7 @@ public class AdventOfCodeDay23 {
             cs = SplitByCharacter(lines[(int) i].string, '-');
             c1 = cs[0].string;
             c2 = cs[1].string;
+
             AddStringToSet(computers, c1);
             AddStringToSet(computers, c2);
 
@@ -169,44 +173,43 @@ public class AdventOfCodeDay23 {
 
         // 2
         prev = CreateSet();
-        InitIterator(links.tree, nodeRef);
-        for(;GetNextData(links.tree, nodeRef, keyRef, valueRef);){
+
+        for(InitStructIterator(links, structIt); IterateStruct(structIt, keyRef, valueRef);){
             for(i = 0d; i < ArrayLength(valueRef.data.array); i = i + 1d){
                 con = ArrayIndexString(valueRef.data.array, i);
                 set = CreateSet();
-                AddStringToSet(set, keyRef.data.string);
+                AddStringToSet(set, keyRef.string);
                 AddStringToSet(set, con);
                 AddSetToSet(prev, set);
             }
         }
 
-        group = new DataReference();
+        group = new SetReference();
         it2 = new SetIterator();
 
         done = false;
         for(;!done;) {
             // n + 1
             next = CreateSet();
-            InitSetIterator(prev, it);
-            for (;SetIterate(it, group);) {
+
+            for (InitSetIterator(prev, it); SetIterateSets(it, group);) {
                 // Find all computers linked to all
-                InitSetIterator(computers, it2);
-                for (;SetIterate(it2, com);) {
+                for (InitSetIterator(computers, it2); SetIterateStrings(it2, computer);) {
                     count = 0d;
-                    cons = GetArrayFromStruct(links, com.data.string);
-                    // String con : cons
+                    cons = GetArrayFromStruct(links, computer.string);
+
                     for (i = 0d; i < ArrayLength(cons); i = i + 1d) {
                         con = ArrayIndexString(cons, i);
-                        if (SetContains(group.data.set, CreateStringData(con))) {
+                        if (SetContainsString(group.set, con)) {
                             count = count + 1;
                         }
                     }
 
                     // Check if linked to the same as the group size, if so, add
-                    if (count == SetSize(group.data.set)) {
+                    if (count == SetSize(group.set)) {
                         set = CreateSet();
-                        AddAllToSet(set, group.data.set);
-                        AddStringToSet(set, com.data.string);
+                        AddAllToSet(set, group.set);
+                        AddStringToSet(set, computer.string);
                         AddSetToSet(next, set);
                     }
                 }
@@ -220,16 +223,16 @@ public class AdventOfCodeDay23 {
         }
 
         // Get only element left
-        code = new DataReference();
+        code = new SetReference();
         InitSetIterator(prev, it);
-        SetIterate(it, code);
+        SetIterateSets(it, code);
 
         // Sort
-        arr = CreateStringArrayReferenceLengthValue(SetSize(code.data.set), "".toCharArray());
+        arr = CreateStringArrayReferenceLengthValue(SetSize(code.set), "".toCharArray());
 
-        InitSetIterator(code.data.set, it);
-        for (i = 0d;SetIterate(it, com);i = i + 1d) {
-            arr.stringArray[(int)i].string = com.data.string;
+        InitSetIterator(code.set, it);
+        for (i = 0d; SetIterateStrings(it, computer); i = i + 1d) {
+            arr.stringArray[(int)i].string = computer.string;
         }
 
         xQuickSortStrings(arr);
